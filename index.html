@@ -1,0 +1,361 @@
+Here is the complete, single-file `index.html` that perfectly captures that exact flow. It handles the cinematic typewriter intro, the smooth fade into the mobile login, the dark/light mode toggle, and the split main panel—all completely responsive for mobile and laptop.
+
+Since you are hosting this on GitHub Pages, having the CSS, JS, and HTML in one tight, fast-loading file is a great way to keep your MVP lean.
+
+Save this as **`index.html`**:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shree Balaji Medical Store</title>
+    <style>
+        /* --- CSS Variables for Light/Dark Mode --- */
+        :root {
+            --bg-color: #f8fafc;
+            --text-color: #0f172a;
+            --card-bg: #ffffff;
+            --border-color: #e2e8f0;
+            --primary: #0284c7;
+            --primary-hover: #0369a1;
+            --input-bg: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #0f172a;
+            --text-color: #f8fafc;
+            --card-bg: #1e293b;
+            --border-color: #334155;
+            --primary: #38bdf8;
+            --primary-hover: #0284c7;
+            --input-bg: #0f172a;
+        }
+
+        /* --- Global Reset & Typography --- */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+        }
+
+        /* --- Intro Screen (Typewriter) --- */
+        #intro-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--bg-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            transition: opacity 1.5s ease, visibility 1.5s ease;
+        }
+
+        #typewriter-text {
+            font-size: 1.8rem;
+            font-weight: 700;
+            text-align: center;
+            letter-spacing: 2px;
+            border-right: 3px solid var(--primary);
+            padding-right: 5px;
+            animation: blinkCursor 0.75s step-end infinite;
+            padding: 0 20px;
+        }
+
+        @keyframes blinkCursor {
+            from, to { border-color: transparent; }
+            50% { border-color: var(--primary); }
+        }
+
+        /* --- Main App Container --- */
+        #app-container {
+            width: 100%;
+            max-width: 900px;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(20px);
+            transition: opacity 1s ease, transform 1s ease;
+        }
+
+        /* Utility Classes for JS toggling */
+        .fade-out {
+            opacity: 0 !important;
+            visibility: hidden !important;
+        }
+        
+        .fade-in {
+            opacity: 1 !important;
+            visibility: visible !important;
+            transform: translateY(0) !important;
+        }
+
+        .hidden-section {
+            display: none !important;
+        }
+
+        /* --- Header & Theme Toggle --- */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            width: 100%;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        #theme-toggle {
+            background: none;
+            border: 2px solid var(--border-color);
+            color: var(--text-color);
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        /* --- Generic Card Styles --- */
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 40px 30px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .card h2 {
+            margin-bottom: 20px;
+            font-size: 1.4rem;
+        }
+
+        /* --- Inputs & Buttons --- */
+        input[type="tel"], input[type="text"] {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+            margin-bottom: 20px;
+            outline: none;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* --- Main Panel (Two Options) --- */
+        #main-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 600px) {
+            #main-panel {
+                grid-template-columns: 1fr;
+            }
+            #typewriter-text {
+                font-size: 1.3rem;
+            }
+        }
+
+        .option-card {
+            background-color: var(--card-bg);
+            border: 2px dashed var(--border-color);
+            border-radius: 16px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, border-color 0.2s;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 250px;
+        }
+
+        .option-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--primary);
+        }
+
+        .option-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .option-card h3 {
+            font-size: 1.2rem;
+            color: var(--text-color);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="intro-screen">
+        <div id="typewriter-text"></div>
+    </div>
+
+    <div id="app-container">
+        
+        <header>
+            <h1>Shree Balaji Medical</h1>
+            <button id="theme-toggle">🌙 Dark Mode</button>
+        </header>
+
+        <div id="login-panel" class="card">
+            <h2>Enter Mobile Number</h2>
+            <p style="margin-bottom: 20px; color: gray; font-size: 0.9rem;">Please enter your number to continue.</p>
+            <input type="tel" id="mobile-input" placeholder="+91 00000 00000" maxlength="10">
+            <button class="btn" id="continue-btn">Continue to Store</button>
+        </div>
+
+        <div id="main-panel" class="hidden-section">
+            
+            <div class="option-card" onclick="alert('Opening General Medicines interface...')">
+                <div class="option-icon">💊</div>
+                <h3>Order General Medicines</h3>
+                <p style="font-size: 0.85rem; color: gray; margin-top: 10px;">Type the names of medicines you need manually.</p>
+            </div>
+
+            <div class="option-card" onclick="alert('Opening Prescription Upload interface...')">
+                <div class="option-icon">📄</div>
+                <h3>Upload Doctor Prescription</h3>
+                <p style="font-size: 0.85rem; color: gray; margin-top: 10px;">Take a photo or drop your prescription file here.</p>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        // --- 1. Typewriter Effect Logic ---
+        const introText = "SHREE BALAJI MEDICAL STORE, WELCOMES YOU";
+        const typewriterElement = document.getElementById("typewriter-text");
+        const introScreen = document.getElementById("intro-screen");
+        const appContainer = document.getElementById("app-container");
+        
+        let charIndex = 0;
+
+        function typeWriter() {
+            if (charIndex < introText.length) {
+                typewriterElement.innerHTML += introText.charAt(charIndex);
+                charIndex++;
+                // Randomize typing speed slightly for realism
+                setTimeout(typeWriter, Math.random() * 50 + 50); 
+            } else {
+                // When typing is done, wait 1.5 seconds, then fade out
+                setTimeout(() => {
+                    introScreen.classList.add("fade-out");
+                    // Wait for fadeout animation to finish, then show the app
+                    setTimeout(() => {
+                        introScreen.style.display = "none";
+                        appContainer.classList.add("fade-in");
+                    }, 1000);
+                }, 1500);
+            }
+        }
+
+        // Start typing on page load
+        window.onload = () => {
+            typeWriter();
+        };
+
+        // --- 2. Dark/Light Mode Toggle Logic ---
+        const themeToggleBtn = document.getElementById("theme-toggle");
+        
+        themeToggleBtn.addEventListener("click", () => {
+            const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+            if (isDark) {
+                document.documentElement.removeAttribute("data-theme");
+                themeToggleBtn.innerText = "🌙 Dark Mode";
+            } else {
+                document.documentElement.setAttribute("data-theme", "dark");
+                themeToggleBtn.innerText = "☀️ Light Mode";
+            }
+        });
+
+        // --- 3. Mobile Login to Main Panel Transition Logic ---
+        const continueBtn = document.getElementById("continue-btn");
+        const loginPanel = document.getElementById("login-panel");
+        const mainPanel = document.getElementById("main-panel");
+        const mobileInput = document.getElementById("mobile-input");
+
+        continueBtn.addEventListener("click", () => {
+            const mobileNumber = mobileInput.value.trim();
+            
+            // Simple validation to ensure they typed something
+            if (mobileNumber.length < 10) {
+                alert("Please enter a valid 10-digit mobile number.");
+                return;
+            }
+
+            // In a real app, you would save this number to a variable or local storage here.
+            console.log("User logged in with:", mobileNumber);
+
+            // Hide login, show main panel
+            loginPanel.style.display = "none";
+            mainPanel.classList.remove("hidden-section");
+            
+            // Small animation trigger for the main panel
+            mainPanel.style.opacity = 0;
+            setTimeout(() => {
+                mainPanel.style.transition = "opacity 0.5s ease";
+                mainPanel.style.opacity = 1;
+            }, 50);
+        });
+    </script>
+</body>
+</html>
+
+```
