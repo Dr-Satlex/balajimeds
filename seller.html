@@ -3,67 +3,699 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Seller Dashboard</title>
+    <title>Shree Balaji - Admin Dashboard</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
-        body { background: #f1f5f9; display: flex; height: 100vh; }
-        #auth-screen { position: fixed; width: 100%; height: 100%; background: #0f172a; display: flex; align-items: center; justify-content: center; z-index: 100; color: white; }
-        .auth-box { background: #1e293b; padding: 40px; border-radius: 12px; text-align: center; width: 320px; }
-        input, button { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 6px; border: none; }
-        button { background: #38bdf8; color: #0f172a; font-weight: bold; cursor: pointer; }
-        #dashboard { width: 100%; display: none; flex-direction: column; }
-        header { background: white; padding: 20px; border-bottom: 1px solid #cbd5e1; }
-        .order-list { padding: 20px; display: grid; gap: 15px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
-        .order-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; border-left: 5px solid #eab308; }
-        .order-card.taken { border-left-color: #3b82f6; }
-        .order-card.reached { border-left-color: #ec4899; }
-        .order-card.completed { display: none; } /* Hide finished orders from main screen */
-        
-        #order-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; padding: 20px; z-index: 50; }
-        .modal-content { background: white; width: 100%; max-width: 500px; border-radius: 12px; padding: 30px; }
-        .action-btn { width: 100%; padding: 15px; margin-top: 10px; border-radius: 8px; font-weight: bold; color: white; border: none; cursor: pointer; }
+        :root {
+            --bg: #f8fafc;
+            --bg-secondary: #f1f5f9;
+            --text: #0f172a;
+            --text-secondary: #475569;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --primary: #0284c7;
+            --primary-hover: #0369a1;
+            --success: #16a34a;
+            --warning: #ea580c;
+            --error: #dc2626;
+            --pending: #eab308;
+            --taken: #3b82f6;
+            --reached: #ec4899;
+            --completed: #22c55e;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        /* --- AUTH SCREEN --- */
+        #auth-screen {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, var(--primary) 0%, #0369a1 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .auth-container {
+            background: var(--card);
+            padding: 50px;
+            border-radius: 16px;
+            text-align: center;
+            width: 100%;
+            max-width: 380px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        }
+
+        .auth-container h2 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        .auth-container p {
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            font-size: 0.95rem;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        input[type="email"],
+        input[type="password"] {
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 2px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        input[type="email"]:focus,
+        input[type="password"]:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+        }
+
+        #login-btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(135deg, var(--primary), #0369a1);
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 10px;
+        }
+
+        #login-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(2, 132, 199, 0.3);
+        }
+
+        #login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .login-error {
+            color: var(--error);
+            font-size: 0.85rem;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .login-error.show {
+            display: block;
+        }
+
+        /* --- DASHBOARD --- */
+        #dashboard {
+            width: 100%;
+            display: none;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            background: var(--card);
+            padding: 20px 25px;
+            border-bottom: 2px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        header h2 {
+            font-size: 1.5rem;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .user-info {
+            background: var(--bg-secondary);
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        #logout-btn {
+            padding: 10px 20px;
+            background: var(--error);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.9rem;
+        }
+
+        #logout-btn:hover {
+            background: #b91c1c;
+            transform: translateY(-2px);
+        }
+
+        .orders-header {
+            padding: 25px;
+            background: var(--bg);
+        }
+
+        .orders-header h3 {
+            font-size: 1.1rem;
+            color: var(--text);
+            margin-bottom: 10px;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+        }
+
+        .stat-card {
+            background: var(--card);
+            padding: 15px 20px;
+            border-radius: 10px;
+            border-left: 4px solid;
+            font-size: 0.9rem;
+        }
+
+        .stat-card.pending { border-left-color: var(--pending); }
+        .stat-card.taken { border-left-color: var(--taken); }
+        .stat-card.reached { border-left-color: var(--reached); }
+        .stat-card.completed { border-left-color: var(--completed); }
+
+        .stat-count {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin-top: 5px;
+        }
+
+        .orders-list {
+            padding: 25px;
+            display: grid;
+            gap: 15px;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            flex: 1;
+        }
+
+        .order-card {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            border-left: 5px solid;
+            transition: all 0.3s;
+            border-top: 2px solid var(--border);
+            position: relative;
+        }
+
+        .order-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .order-card.pending {
+            border-left-color: var(--pending);
+            background: linear-gradient(135deg, rgba(234, 179, 8, 0.05), transparent);
+        }
+
+        .order-card.taken {
+            border-left-color: var(--taken);
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), transparent);
+        }
+
+        .order-card.reached {
+            border-left-color: var(--reached);
+            background: linear-gradient(135deg, rgba(236, 72, 153, 0.05), transparent);
+        }
+
+        .order-card.completed {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 12px;
+        }
+
+        .order-phone {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge.pending {
+            background: rgba(234, 179, 8, 0.2);
+            color: #854d0e;
+        }
+
+        .status-badge.taken {
+            background: rgba(59, 130, 246, 0.2);
+            color: #1e40af;
+        }
+
+        .status-badge.reached {
+            background: rgba(236, 72, 153, 0.2);
+            color: #9f1239;
+        }
+
+        .status-badge.completed {
+            background: rgba(34, 197, 94, 0.2);
+            color: #15803d;
+        }
+
+        .order-medicines {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin: 12px 0;
+            line-height: 1.4;
+        }
+
+        .order-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .order-time {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .has-image {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+
+        /* --- MODAL --- */
+        #order-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            z-index: 50;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: var(--card);
+            width: 100%;
+            max-width: 500px;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .modal-header h2 {
+            font-size: 1.4rem;
+            color: var(--text);
+        }
+
+        .close-btn {
+            background: var(--bg-secondary);
+            color: var(--text);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .close-btn:hover {
+            background: var(--error);
+            color: white;
+        }
+
+        .modal-section {
+            background: var(--bg-secondary);
+            padding: 18px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .modal-section h4 {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 600;
+        }
+
+        .modal-section p {
+            color: var(--text);
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+
+        .prescription-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 10px 15px;
+            background: var(--primary);
+            color: white;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .prescription-link:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .action-btn {
+            padding: 12px 18px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+            color: white;
+        }
+
+        .action-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-accept {
+            background: var(--taken);
+        }
+
+        .btn-accept:hover:not(:disabled) {
+            background: #2563eb;
+        }
+
+        .btn-ready {
+            background: var(--reached);
+        }
+
+        .btn-ready:hover:not(:disabled) {
+            background: #db2777;
+        }
+
+        .btn-complete {
+            grid-column: 1 / -1;
+            background: var(--completed);
+        }
+
+        .btn-complete:hover:not(:disabled) {
+            background: #16a34a;
+        }
+
+        .update-status {
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--card);
+            padding: 16px 24px;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            display: none;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            border-left: 4px solid var(--primary);
+        }
+
+        .toast.success {
+            border-left-color: var(--success);
+        }
+
+        .toast.error {
+            border-left-color: var(--error);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(400px); }
+            to { transform: translateX(0); }
+        }
+
+        @media (max-width: 768px) {
+            .orders-list {
+                grid-template-columns: 1fr;
+                padding: 15px;
+            }
+
+            .action-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            header {
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .header-actions {
+                flex-wrap: wrap;
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .auth-container {
+                padding: 30px 20px;
+            }
+
+            .modal-content {
+                padding: 20px;
+            }
+
+            .stat-count {
+                font-size: 1.5rem;
+            }
+        }
     </style>
 </head>
 <body>
 
+    <!-- AUTH SCREEN -->
     <div id="auth-screen">
-        <div class="auth-box">
-            <h2>Balaji Admin Login</h2><br>
-            <input type="email" id="admin-email" placeholder="Admin Email">
-            <input type="password" id="admin-pass" placeholder="Password">
-            <button id="login-btn">Login to Dashboard</button>
+        <div class="auth-container">
+            <h2>💊 Admin Login</h2>
+            <p>Shree Balaji Medical Store</p>
+            <div class="auth-form">
+                <input type="email" id="admin-email" placeholder="Admin Email" autocomplete="email">
+                <input type="password" id="admin-pass" placeholder="Password" autocomplete="current-password">
+                <button id="login-btn">Login</button>
+                <div class="login-error" id="login-error"></div>
+            </div>
         </div>
     </div>
 
+    <!-- DASHBOARD -->
     <div id="dashboard">
-        <header><h2>Live Orders Dashboard</h2></header>
-        <div class="order-list" id="orders-container"></div>
+        <header>
+            <h2>📊 Live Orders Dashboard</h2>
+            <div class="header-actions">
+                <div class="user-info">👤 <span id="user-email">Admin</span></div>
+                <button id="logout-btn">Logout</button>
+            </div>
+        </header>
+
+        <div class="orders-header">
+            <h3>Order Summary</h3>
+            <div class="stats">
+                <div class="stat-card pending">
+                    <div class="stat-count" id="count-pending">0</div>
+                    <div class="stat-label">Pending</div>
+                </div>
+                <div class="stat-card taken">
+                    <div class="stat-count" id="count-taken">0</div>
+                    <div class="stat-label">In Progress</div>
+                </div>
+                <div class="stat-card reached">
+                    <div class="stat-count" id="count-reached">0</div>
+                    <div class="stat-label">Ready</div>
+                </div>
+                <div class="stat-card completed">
+                    <div class="stat-count" id="count-completed">0</div>
+                    <div class="stat-label">Completed</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="orders-list" id="orders-container"></div>
+
+        <div id="empty-state" class="empty-state" style="display: none;">
+            <div class="empty-state-icon">📭</div>
+            <h3>No Orders Yet</h3>
+            <p>Waiting for customers to place orders...</p>
+        </div>
     </div>
 
+    <!-- ORDER MODAL -->
     <div id="order-modal">
         <div class="modal-content">
-            <button onclick="document.getElementById('order-modal').style.display='none'" style="background: red; color: white; width: auto; float: right;">X</button>
-            <h2 id="modal-phone">Phone</h2>
-            <div style="background: #f1f5f9; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                <h4>Requested:</h4>
-                <p id="modal-meds"></p><br>
-                <h4>Prescription:</h4>
-                <a id="modal-img-link" href="#" target="_blank" style="color: blue; font-weight: bold;">View Image</a>
+            <div class="modal-header">
+                <h2 id="modal-phone">Order Details</h2>
+                <button class="close-btn" onclick="closeModal()">✕</button>
             </div>
 
-            <h3>Change Status:</h3>
-            <button class="action-btn" style="background: #3b82f6;" onclick="updateStatus('taken')">1. Accept Order</button>
-            <button class="action-btn" style="background: #ec4899;" onclick="updateStatus('reached')">2. Order Ready</button>
-            <button class="action-btn" style="background: #22c55e;" onclick="updateStatus('completed')">3. Complete & Hide</button>
+            <div class="modal-section">
+                <h4>Requested Items</h4>
+                <p id="modal-meds">-</p>
+            </div>
+
+            <div class="modal-section">
+                <h4>Prescription</h4>
+                <p id="prescription-status">No prescription provided</p>
+                <a id="modal-img-link" href="#" target="_blank" class="prescription-link" style="display: none;">
+                    📷 View Prescription
+                </a>
+            </div>
+
+            <div class="modal-section">
+                <h4>Order Time</h4>
+                <p id="modal-time">-</p>
+            </div>
+
+            <h3 style="margin-bottom: 15px;">Update Status:</h3>
+            <div class="action-buttons">
+                <button class="action-btn btn-accept" id="btn-accept" onclick="updateStatus('taken')">
+                    ✓ Accept Order
+                </button>
+                <button class="action-btn btn-ready" id="btn-ready" onclick="updateStatus('reached')">
+                    📦 Ready to Pick
+                </button>
+                <button class="action-btn btn-complete" id="btn-complete" onclick="updateStatus('completed')">
+                    ✓ Mark Complete
+                </button>
+            </div>
         </div>
     </div>
+
+    <div id="toast" class="toast"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+        import { getAuth, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getDatabase, ref, onValue, update, off } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-        // 🔴 PASTE THE EXACT SAME FIREBASE CONFIG HERE:
+        // FIREBASE CONFIG
         const firebaseConfig = {
             apiKey: "AIzaSyBcNh75Xk9kr9Ri0zim92I3PilHdjDM07w",
             authDomain: "shree-balaji-pharma.firebaseapp.com",
@@ -77,70 +709,236 @@
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getDatabase(app);
-        let currentViewingOrderId = null;
 
-        // --- Login Logic ---
-        document.getElementById('login-btn').addEventListener('click', () => {
-            const email = document.getElementById('admin-email').value;
+        let currentViewingOrderId = null;
+        let ordersListener = null;
+
+        // TOAST NOTIFICATION
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 4000);
+        }
+
+        // LOGIN
+        document.getElementById('login-btn').addEventListener('click', async () => {
+            const email = document.getElementById('admin-email').value.trim();
             const pass = document.getElementById('admin-pass').value;
-            signInWithEmailAndPassword(auth, email, pass)
-                .then(() => {
-                    document.getElementById('auth-screen').style.display = 'none';
-                    document.getElementById('dashboard').style.display = 'flex';
-                    listenForOrders();
-                })
-                .catch(error => alert("Login Failed: " + error.message));
+
+            if (!email || !pass) {
+                showLoginError('Enter email and password');
+                return;
+            }
+
+            const btn = document.getElementById('login-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Logging in...';
+
+            try {
+                await signInWithEmailAndPassword(auth, email, pass);
+                document.getElementById('user-email').textContent = email.split('@')[0];
+                document.getElementById('auth-screen').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'flex';
+                listenForOrders();
+                showToast('✓ Login successful!', 'success');
+            } catch (error) {
+                const errorMsg = error.code === 'auth/user-not-found' ? 'User not found'
+                    : error.code === 'auth/wrong-password' ? 'Wrong password'
+                    : error.code === 'auth/invalid-email' ? 'Invalid email'
+                    : error.message;
+                showLoginError('❌ ' + errorMsg);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Login';
+            }
         });
 
-        // --- Live Dashboard Logic ---
+        function showLoginError(message) {
+            const errorEl = document.getElementById('login-error');
+            errorEl.textContent = message;
+            errorEl.classList.add('show');
+            setTimeout(() => {
+                errorEl.classList.remove('show');
+            }, 4000);
+        }
+
+        // LOGOUT
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            if (confirm('Are you sure you want to logout?')) {
+                try {
+                    await signOut(auth);
+                    if (ordersListener) {
+                        off(ordersListener);
+                    }
+                    document.getElementById('auth-screen').style.display = 'flex';
+                    document.getElementById('dashboard').style.display = 'none';
+                    document.getElementById('admin-email').value = '';
+                    document.getElementById('admin-pass').value = '';
+                    showToast('✓ Logged out successfully', 'success');
+                } catch (error) {
+                    showToast('❌ Logout failed: ' + error.message, 'error');
+                }
+            }
+        });
+
+        // LISTEN FOR ORDERS
         function listenForOrders() {
             const ordersRef = ref(db, 'orders');
+            ordersListener = ordersRef;
+            
             onValue(ordersRef, (snapshot) => {
                 const container = document.getElementById('orders-container');
-                container.innerHTML = ''; // Clear board
-                
+                const emptyState = document.getElementById('empty-state');
+                container.innerHTML = '';
+
+                const stats = { pending: 0, taken: 0, reached: 0, completed: 0 };
+                const orders = [];
+
                 snapshot.forEach((childSnapshot) => {
                     const orderId = childSnapshot.key;
                     const data = childSnapshot.val();
-                    
-                    const card = document.createElement('div');
-                    card.className = `order-card ${data.status}`;
-                    card.innerHTML = `
-                        <h3>📞 ${data.phone}</h3>
-                        <p style="color: gray; margin-top: 5px;">Status: <strong>${data.status.toUpperCase()}</strong></p>
-                        <p style="margin-top: 5px;">${data.medicines}</p>
-                    `;
-                    
-                    card.onclick = () => {
-                        currentViewingOrderId = orderId;
-                        document.getElementById('modal-phone').innerText = `Phone: ${data.phone}`;
-                        document.getElementById('modal-meds').innerText = data.medicines;
-                        
-                        const imgLink = document.getElementById('modal-img-link');
-                        if (data.photoUrl) {
-                            imgLink.href = data.photoUrl;
-                            imgLink.innerText = "Click to View Prescription Photo";
-                        } else {
-                            imgLink.removeAttribute('href');
-                            imgLink.innerText = "No photo provided.";
-                        }
-                        
-                        document.getElementById('order-modal').style.display = 'flex';
-                    };
-                    
-                    container.prepend(card); // Newest on top
+                    orders.push({ orderId, ...data });
+                    stats[data.status]++;
                 });
+
+                // Sort: pending first, then taken, then reached
+                orders.sort((a, b) => {
+                    const statusOrder = { pending: 0, taken: 1, reached: 2, completed: 3 };
+                    return statusOrder[a.status] - statusOrder[b.status];
+                });
+
+                if (orders.length === 0) {
+                    emptyState.style.display = 'block';
+                } else {
+                    emptyState.style.display = 'none';
+                    orders.forEach(order => {
+                        if (order.status !== 'completed') {
+                            const card = createOrderCard(order.orderId, order);
+                            container.appendChild(card);
+                        }
+                    });
+                }
+
+                // Update stats
+                document.getElementById('count-pending').textContent = stats.pending;
+                document.getElementById('count-taken').textContent = stats.taken;
+                document.getElementById('count-reached').textContent = stats.reached;
+                document.getElementById('count-completed').textContent = stats.completed;
             });
         }
 
-        // --- Status Update Logic (Sends to Firebase, Index.html updates instantly) ---
-        window.updateStatus = function(newStatus) {
-            if (!currentViewingOrderId) return;
-            const specificOrderRef = ref(db, `orders/${currentViewingOrderId}`);
-            update(specificOrderRef, { status: newStatus }).then(() => {
-                if (newStatus === 'completed') document.getElementById('order-modal').style.display = 'none';
-            });
+        // CREATE ORDER CARD
+        function createOrderCard(orderId, data) {
+            const card = document.createElement('div');
+            card.className = `order-card ${data.status}`;
+            
+            const timeAgo = getTimeAgo(data.timestamp);
+            
+            card.innerHTML = `
+                <div class="order-header">
+                    <span class="order-phone">📞 ${data.phone}</span>
+                    <span class="status-badge ${data.status}">${data.status}</span>
+                </div>
+                <div class="order-medicines">${data.medicines}</div>
+                <div class="order-footer">
+                    <span class="order-time">⏱️ ${timeAgo}</span>
+                    ${data.photoUrl ? '<span class="has-image">📷 Prescription</span>' : ''}
+                </div>
+            `;
+
+            card.onclick = () => {
+                currentViewingOrderId = orderId;
+                openModal(data);
+            };
+
+            return card;
         }
+
+        // OPEN MODAL
+        function openModal(data) {
+            document.getElementById('modal-phone').textContent = `📞 ${data.phone}`;
+            document.getElementById('modal-meds').textContent = data.medicines;
+            document.getElementById('modal-time').textContent = new Date(data.timestamp).toLocaleString('en-IN');
+
+            const imgLink = document.getElementById('modal-img-link');
+            const prescriptionStatus = document.getElementById('prescription-status');
+
+            if (data.photoUrl) {
+                imgLink.href = data.photoUrl;
+                imgLink.style.display = 'inline-block';
+                prescriptionStatus.textContent = '✓ Prescription uploaded';
+            } else {
+                imgLink.style.display = 'none';
+                prescriptionStatus.textContent = 'No prescription provided';
+            }
+
+            document.getElementById('order-modal').style.display = 'flex';
+        }
+
+        // CLOSE MODAL
+        window.closeModal = function() {
+            document.getElementById('order-modal').style.display = 'none';
+        };
+
+        // KEYBOARD: ESC to close modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && document.getElementById('order-modal').style.display === 'flex') {
+                closeModal();
+            }
+        });
+
+        // UPDATE STATUS
+        window.updateStatus = async function(newStatus) {
+            if (!currentViewingOrderId) return;
+
+            const btn = event.target;
+            const originalText = btn.textContent;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> ' + btn.textContent;
+
+            try {
+                const orderRef = ref(db, `orders/${currentViewingOrderId}`);
+                await update(orderRef, { status: newStatus });
+                
+                if (newStatus === 'completed') {
+                    showToast('✓ Order marked as completed!', 'success');
+                    closeModal();
+                } else {
+                    showToast('✓ Status updated successfully!', 'success');
+                    closeModal();
+                }
+            } catch (error) {
+                showToast('❌ Error: ' + error.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            }
+        };
+
+        // TIME AGO
+        function getTimeAgo(timestamp) {
+            const now = Date.now();
+            const diff = now - timestamp;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+
+            if (minutes < 1) return 'Just now';
+            if (minutes < 60) return `${minutes}m ago`;
+            if (hours < 24) return `${hours}h ago`;
+            return `${days}d ago`;
+        }
+
+        // Click outside modal to close
+        document.getElementById('order-modal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('order-modal')) {
+                closeModal();
+            }
+        });
     </script>
 </body>
 </html>
