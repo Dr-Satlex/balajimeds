@@ -5,26 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shree Balaji Medical Store</title>
     <style>
-        /* Core Variables & Reset */
         :root { --bg: #f8fafc; --text: #0f172a; --card: #ffffff; --border: #e2e8f0; --primary: #0284c7; }
         [data-theme="dark"] { --bg: #0f172a; --text: #f8fafc; --card: #1e293b; --border: #334155; --primary: #38bdf8; }
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; transition: 0.3s; }
         body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        
         .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 30px; width: 100%; max-width: 500px; margin-top: 20px; text-align: center; }
         .hidden { display: none !important; }
-        input, button { width: 100%; padding: 14px; border-radius: 8px; font-size: 1rem; margin-bottom: 15px; outline: none; }
-        input { border: 2px solid var(--border); background: var(--card); color: var(--text); }
+        input, button { width: 100%; padding: 14px; border-radius: 8px; font-size: 1rem; margin-bottom: 15px; outline: none; border: 2px solid var(--border); background: var(--card); color: var(--text); }
         button { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; }
-        
-        /* Chat UI */
-        #chat-box { height: 250px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px; background: var(--bg); }
-        .msg { padding: 8px 12px; border-radius: 12px; max-width: 80%; font-size: 0.9rem; text-align: left; }
-        .msg.buyer { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
-        .msg.seller { background: var(--border); color: var(--text); align-self: flex-start; border-bottom-left-radius: 2px; }
-        
-        /* Status Banner */
         #status-banner { font-size: 1.2rem; font-weight: bold; padding: 15px; border-radius: 8px; background: #fef08a; color: #854d0e; margin-bottom: 20px; }
+        #drop-zone { border: 2px dashed var(--border); padding: 20px; border-radius: 8px; margin-bottom: 15px; cursor: pointer; color: gray; }
     </style>
 </head>
 <body>
@@ -37,84 +27,116 @@
     <div id="order-panel" class="card">
         <h2>Place Your Order</h2>
         <input type="tel" id="mobile" placeholder="Mobile Number (+91...)" maxlength="10">
-        <input type="text" id="medicines" placeholder="Type medicines here...">
+        <input type="text" id="medicines" placeholder="Type medicines (e.g., Aspirin x2)...">
+        
         <p style="margin: 10px 0; color: gray;">- OR -</p>
-        <div style="border: 2px dashed var(--border); padding: 20px; border-radius: 8px; margin-bottom: 15px; cursor: pointer;">
-            Upload Prescription Image
-        </div>
-        <button id="submit-btn">Submit Order</button>
+        
+        <div id="drop-zone">Click to Upload Prescription Image</div>
+        <input type="file" id="file-input" class="hidden" accept="image/*">
+        
+        <button id="submit-btn">Submit Order Instantly</button>
     </div>
 
     <div id="tracking-panel" class="card hidden">
         <div id="status-banner">Status: Pending...</div>
-        
-        <div id="chat-ui" class="hidden">
-            <h3 style="margin-bottom: 10px; text-align: left;">Live Chat with Store</h3>
-            <div id="chat-box">
-                </div>
-            <div style="display: flex; gap: 10px;">
-                <input type="text" id="chat-input" placeholder="Type a message..." style="margin-bottom: 0;">
-                <button id="send-btn" style="width: auto; margin-bottom: 0;">Send</button>
-            </div>
-        </div>
-        
-        <button id="new-order-btn" class="hidden" style="margin-top: 20px;">Place New Order</button>
+        <p style="color: gray;">Do not close this page. We are reviewing your order live.</p>
+        <button id="new-order-btn" class="hidden" style="margin-top: 20px;" onclick="location.reload()">Place New Order</button>
     </div>
 
     <script type="module">
-        // TODO: Import Firebase SDK here and initialize (We will do this next)
-        
-        const ui = {
-            orderPanel: document.getElementById('order-panel'),
-            trackPanel: document.getElementById('tracking-panel'),
-            statusBanner: document.getElementById('status-banner'),
-            chatUi: document.getElementById('chat-ui'),
-            chatBox: document.getElementById('chat-box'),
-            newOrderBtn: document.getElementById('new-order-btn')
+        // --- 1. FIREBASE & API SETUP (PASTE YOUR KEYS HERE) ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+        const firebaseConfig = {
+            // 🔴 PASTE YOUR EXACT FIREBASE CONFIG OBJECT HERE:
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "YOUR_PROJECT",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abc"
         };
+        const IMGBB_API_KEY = "PASTE_YOUR_IMGBB_KEY_HERE"; // 🔴 PASTE IMGBB KEY HERE
 
-        // UI State Machine Trigger
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // --- 2. FRONTEND LOGIC ---
+        let selectedFile = null;
+        document.getElementById('drop-zone').addEventListener('click', () => document.getElementById('file-input').click());
+        document.getElementById('file-input').addEventListener('change', (e) => {
+            selectedFile = e.target.files[0];
+            document.getElementById('drop-zone').innerText = `📄 ${selectedFile.name}`;
+            document.getElementById('drop-zone').style.borderColor = "var(--primary)";
+        });
+
+        // --- 3. SUBMIT & UPLOAD LOGIC ---
+        document.getElementById('submit-btn').addEventListener('click', async () => {
+            const phone = document.getElementById('mobile').value.trim();
+            const meds = document.getElementById('medicines').value.trim();
+
+            if (phone.length < 10) return alert("Enter valid 10-digit mobile number.");
+            if (!meds && !selectedFile) return alert("Enter medicines or upload a prescription.");
+
+            document.getElementById('submit-btn').innerText = "Processing... Please wait.";
+            document.getElementById('submit-btn').disabled = true;
+
+            let imageUrl = null;
+
+            // If image exists, send to ImgBB
+            if (selectedFile) {
+                const formData = new FormData();
+                formData.append("image", selectedFile);
+                try {
+                    const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: formData });
+                    const data = await res.json();
+                    imageUrl = data.data.url; // We got the clean URL!
+                } catch (e) {
+                    alert("Image upload failed. Try again.");
+                    return;
+                }
+            }
+
+            // Push to Firebase Realtime Database
+            const payload = {
+                phone: phone,
+                medicines: meds || "None (Image Uploaded)",
+                photoUrl: imageUrl,
+                status: "pending",
+                timestamp: Date.now()
+            };
+
+            const ordersRef = ref(db, 'orders');
+            const newOrderRef = push(ordersRef);
+            await set(newOrderRef, payload);
+
+            // Shift UI & Start Listening to this specific order!
+            document.getElementById('order-panel').classList.add('hidden');
+            document.getElementById('tracking-panel').classList.remove('hidden');
+
+            const liveOrderRef = ref(db, `orders/${newOrderRef.key}`);
+            onValue(liveOrderRef, (snapshot) => {
+                const data = snapshot.val();
+                if(data) updateBuyerUI(data.status);
+            });
+        });
+
         function updateBuyerUI(status) {
-            ui.orderPanel.classList.add('hidden');
-            ui.trackPanel.classList.remove('hidden');
-
-            if (status === 'pending') {
-                ui.statusBanner.innerText = "Order Sent! Waiting for store to accept...";
-                ui.statusBanner.style.background = "#fef08a"; // Yellow
-            } 
-            else if (status === 'taken') {
-                ui.statusBanner.innerText = "Order Taken! Store is preparing it.";
-                ui.statusBanner.style.background = "#bfdbfe"; // Blue
-                ui.chatUi.classList.remove('hidden'); // Unlock chat
-            } 
-            else if (status === 'reached') {
-                ui.statusBanner.innerText = "Order Ready! Kindly collect your order.";
-                ui.statusBanner.style.background = "#fbcfe8"; // Pink
-            } 
-            else if (status === 'completed') {
-                ui.statusBanner.innerText = "Thanks for purchasing! Keep healthy & get well soon.";
-                ui.statusBanner.style.background = "#bbf7d0"; // Green
-                ui.chatUi.classList.add('hidden');
-                ui.newOrderBtn.classList.remove('hidden'); // Allow new order
+            const banner = document.getElementById('status-banner');
+            if (status === 'pending') { banner.innerText = "Order Sent! Waiting for store to accept..."; banner.style.background = "#fef08a"; } 
+            else if (status === 'taken') { banner.innerText = "Order Taken! Store is preparing it."; banner.style.background = "#bfdbfe"; } 
+            else if (status === 'reached') { banner.innerText = "Order Ready! Kindly collect your order."; banner.style.background = "#fbcfe8"; } 
+            else if (status === 'completed') { 
+                banner.innerText = "Thanks for purchasing! Keep healthy & get well soon."; 
+                banner.style.background = "#bbf7d0"; 
+                document.getElementById('new-order-btn').classList.remove('hidden');
             }
         }
 
-        // Mock Submission (Will be replaced with Firebase push)
-        document.getElementById('submit-btn').addEventListener('click', () => {
-            const phone = document.getElementById('mobile').value;
-            if(phone.length < 10) return alert("Enter valid number");
-            
-            // 1. Save to local storage so user doesn't lose it on refresh
-            localStorage.setItem("currentOrderId", "MOCK_ID_123");
-            
-            // 2. Shift UI
-            updateBuyerUI('pending');
-        });
-
         // Theme Toggle
-        document.getElementById('theme-btn').addEventListener('click', () => {
-            document.body.dataset.theme = document.body.dataset.theme === "dark" ? "" : "dark";
-        });
+        document.getElementById('theme-btn').addEventListener('click', () => { document.body.dataset.theme = document.body.dataset.theme === "dark" ? "" : "dark"; });
     </script>
 </body>
 </html>
