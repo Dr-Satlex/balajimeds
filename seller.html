@@ -7,123 +7,139 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
         body { background: #f1f5f9; display: flex; height: 100vh; }
-        
-        /* Auth Screen */
         #auth-screen { position: fixed; width: 100%; height: 100%; background: #0f172a; display: flex; align-items: center; justify-content: center; z-index: 100; color: white; }
-        .auth-box { background: #1e293b; padding: 40px; border-radius: 12px; text-align: center; width: 300px; }
+        .auth-box { background: #1e293b; padding: 40px; border-radius: 12px; text-align: center; width: 320px; }
         input, button { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 6px; border: none; }
         button { background: #38bdf8; color: #0f172a; font-weight: bold; cursor: pointer; }
-
-        /* Dashboard */
         #dashboard { width: 100%; display: none; flex-direction: column; }
-        header { background: white; padding: 20px; border-bottom: 1px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; }
+        header { background: white; padding: 20px; border-bottom: 1px solid #cbd5e1; }
         .order-list { padding: 20px; display: grid; gap: 15px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
-        
         .order-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; border-left: 5px solid #eab308; }
         .order-card.taken { border-left-color: #3b82f6; }
         .order-card.reached { border-left-color: #ec4899; }
+        .order-card.completed { display: none; } /* Hide finished orders from main screen */
         
-        /* Full Screen Modal */
-        #order-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; padding: 20px; }
-        .modal-content { background: white; width: 100%; max-width: 800px; height: 90vh; border-radius: 12px; display: flex; overflow: hidden; }
-        
-        .modal-details { flex: 1; padding: 30px; border-right: 1px solid #cbd5e1; overflow-y: auto; }
-        .modal-chat { flex: 1; background: #f8fafc; display: flex; flex-direction: column; }
-        
+        #order-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; padding: 20px; z-index: 50; }
+        .modal-content { background: white; width: 100%; max-width: 500px; border-radius: 12px; padding: 30px; }
         .action-btn { width: 100%; padding: 15px; margin-top: 10px; border-radius: 8px; font-weight: bold; color: white; border: none; cursor: pointer; }
-        
-        /* Chat Area */
-        .chat-history { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
-        .chat-input-area { padding: 15px; background: white; border-top: 1px solid #cbd5e1; display: flex; gap: 10px; }
-        .chat-bubble { padding: 10px 15px; border-radius: 12px; max-width: 80%; font-size: 0.9rem; }
-        .chat-bubble.seller { background: #38bdf8; color: white; align-self: flex-end; }
-        .chat-bubble.buyer { background: #e2e8f0; align-self: flex-start; }
     </style>
 </head>
 <body>
 
     <div id="auth-screen">
         <div class="auth-box">
-            <h2>Admin Login</h2>
-            <br>
-            <input type="password" id="admin-pass" placeholder="Enter Secure Password">
-            <button id="login-btn">Access Dashboard</button>
+            <h2>Balaji Admin Login</h2><br>
+            <input type="email" id="admin-email" placeholder="Admin Email">
+            <input type="password" id="admin-pass" placeholder="Password">
+            <button id="login-btn">Login to Dashboard</button>
         </div>
     </div>
 
     <div id="dashboard">
-        <header>
-            <h2>Live Orders</h2>
-            <button style="width: auto; margin: 0;" onclick="location.reload()">Refresh Data</button>
-        </header>
-        
-        <div class="order-list" id="orders-container">
-            <div class="order-card" onclick="openOrderModal('ORD_123', '9999999999', 'pending')">
-                <h3>+91 99999 99999</h3>
-                <p style="color: gray; margin-top: 5px;">Status: Pending</p>
-                <p style="margin-top: 10px; font-weight: bold;">Click to view & manage</p>
-            </div>
-        </div>
+        <header><h2>Live Orders Dashboard</h2></header>
+        <div class="order-list" id="orders-container"></div>
     </div>
 
     <div id="order-modal">
         <div class="modal-content">
-            
-            <div class="modal-details">
-                <button onclick="document.getElementById('order-modal').style.display='none'" style="width: auto; background: red; margin-bottom: 20px;">Close X</button>
-                <h2 id="modal-phone">Phone Number</h2>
-                <div style="background: #f1f5f9; padding: 15px; border-radius: 8px; margin: 20px 0;">
-                    <h4>Medicines Requested:</h4>
-                    <p>Aspirin, Paracetamol</p>
-                    <br>
-                    <h4>Prescription Photo:</h4>
-                    <p style="color: gray;">No image uploaded</p>
-                </div>
-
-                <h3>Update Status:</h3>
-                <button class="action-btn" style="background: #3b82f6;" onclick="updateStatus('taken')">1. Take Order</button>
-                <button class="action-btn" style="background: #ec4899;" onclick="updateStatus('reached')">2. Order Reached / Ready</button>
-                <button class="action-btn" style="background: #22c55e;" onclick="updateStatus('completed')">3. Payment Received & Complete</button>
-                <button class="action-btn" style="background: #ef4444;" onclick="updateStatus('cancelled')">Cancel Order</button>
+            <button onclick="document.getElementById('order-modal').style.display='none'" style="background: red; color: white; width: auto; float: right;">X</button>
+            <h2 id="modal-phone">Phone</h2>
+            <div style="background: #f1f5f9; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                <h4>Requested:</h4>
+                <p id="modal-meds"></p><br>
+                <h4>Prescription:</h4>
+                <a id="modal-img-link" href="#" target="_blank" style="color: blue; font-weight: bold;">View Image</a>
             </div>
 
-            <div class="modal-chat">
-                <div style="padding: 15px; background: white; border-bottom: 1px solid #cbd5e1; font-weight: bold;">Live Chat with Buyer</div>
-                <div class="chat-history" id="seller-chat-history">
-                    <div class="chat-bubble buyer">Is my order ready?</div>
-                    <div class="chat-bubble seller">We are packing it now!</div>
-                </div>
-                <div class="chat-input-area">
-                    <input type="text" placeholder="Type message..." style="margin: 0; border: 1px solid #ccc;">
-                    <button style="margin: 0; width: 80px;">Send</button>
-                </div>
-            </div>
-            
+            <h3>Change Status:</h3>
+            <button class="action-btn" style="background: #3b82f6;" onclick="updateStatus('taken')">1. Accept Order</button>
+            <button class="action-btn" style="background: #ec4899;" onclick="updateStatus('reached')">2. Order Ready</button>
+            <button class="action-btn" style="background: #22c55e;" onclick="updateStatus('completed')">3. Complete & Hide</button>
         </div>
     </div>
 
     <script type="module">
-        // --- 1. Admin Login Logic ---
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getDatabase, ref, onValue, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+        // 🔴 PASTE THE EXACT SAME FIREBASE CONFIG HERE:
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "YOUR_PROJECT",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abc"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getDatabase(app);
+        let currentViewingOrderId = null;
+
+        // --- Login Logic ---
         document.getElementById('login-btn').addEventListener('click', () => {
-            // TODO: Replace with Firebase auth
-            document.getElementById('auth-screen').style.display = 'none';
-            document.getElementById('dashboard').style.display = 'flex';
+            const email = document.getElementById('admin-email').value;
+            const pass = document.getElementById('admin-pass').value;
+            signInWithEmailAndPassword(auth, email, pass)
+                .then(() => {
+                    document.getElementById('auth-screen').style.display = 'none';
+                    document.getElementById('dashboard').style.display = 'flex';
+                    listenForOrders();
+                })
+                .catch(error => alert("Login Failed: " + error.message));
         });
 
-        // --- 2. Modal Controls ---
-        window.openOrderModal = function(orderId, phone, currentStatus) {
-            document.getElementById('modal-phone').innerText = `Customer: ${phone}`;
-            document.getElementById('order-modal').style.display = 'flex';
+        // --- Live Dashboard Logic ---
+        function listenForOrders() {
+            const ordersRef = ref(db, 'orders');
+            onValue(ordersRef, (snapshot) => {
+                const container = document.getElementById('orders-container');
+                container.innerHTML = ''; // Clear board
+                
+                snapshot.forEach((childSnapshot) => {
+                    const orderId = childSnapshot.key;
+                    const data = childSnapshot.val();
+                    
+                    const card = document.createElement('div');
+                    card.className = `order-card ${data.status}`;
+                    card.innerHTML = `
+                        <h3>📞 ${data.phone}</h3>
+                        <p style="color: gray; margin-top: 5px;">Status: <strong>${data.status.toUpperCase()}</strong></p>
+                        <p style="margin-top: 5px;">${data.medicines}</p>
+                    `;
+                    
+                    card.onclick = () => {
+                        currentViewingOrderId = orderId;
+                        document.getElementById('modal-phone').innerText = `Phone: ${data.phone}`;
+                        document.getElementById('modal-meds').innerText = data.medicines;
+                        
+                        const imgLink = document.getElementById('modal-img-link');
+                        if (data.photoUrl) {
+                            imgLink.href = data.photoUrl;
+                            imgLink.innerText = "Click to View Prescription Photo";
+                        } else {
+                            imgLink.removeAttribute('href');
+                            imgLink.innerText = "No photo provided.";
+                        }
+                        
+                        document.getElementById('order-modal').style.display = 'flex';
+                    };
+                    
+                    container.prepend(card); // Newest on top
+                });
+            });
         }
 
-        // --- 3. State Machine Publisher ---
+        // --- Status Update Logic (Sends to Firebase, Index.html updates instantly) ---
         window.updateStatus = function(newStatus) {
-            // TODO: Here we will write the exact Firebase command:
-            // update(ref(db, `orders/${currentOrderId}`), { status: newStatus });
-            alert(`Order status updated to: ${newStatus} in database. User will see changes instantly.`);
-            if(newStatus === 'completed') {
-                document.getElementById('order-modal').style.display = 'none';
-            }
+            if (!currentViewingOrderId) return;
+            const specificOrderRef = ref(db, `orders/${currentViewingOrderId}`);
+            update(specificOrderRef, { status: newStatus }).then(() => {
+                if (newStatus === 'completed') document.getElementById('order-modal').style.display = 'none';
+            });
         }
     </script>
 </body>
