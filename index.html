@@ -3,53 +3,476 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shree Balaji Medical Store</title>
+    <title>Shree Balaji Medical Store - Quick Order</title>
     <style>
-        :root { --bg: #f8fafc; --text: #0f172a; --card: #ffffff; --border: #e2e8f0; --primary: #0284c7; }
-        [data-theme="dark"] { --bg: #0f172a; --text: #f8fafc; --card: #1e293b; --border: #334155; --primary: #38bdf8; }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: -apple-system, sans-serif; transition: 0.3s; }
-        body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
-        .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 30px; width: 100%; max-width: 500px; margin-top: 20px; text-align: center; }
-        .hidden { display: none !important; }
-        input, button { width: 100%; padding: 14px; border-radius: 8px; font-size: 1rem; margin-bottom: 15px; outline: none; border: 2px solid var(--border); background: var(--card); color: var(--text); }
-        button { background: var(--primary); color: white; border: none; font-weight: bold; cursor: pointer; }
-        #status-banner { font-size: 1.2rem; font-weight: bold; padding: 15px; border-radius: 8px; background: #fef08a; color: #854d0e; margin-bottom: 20px; }
-        #drop-zone { border: 2px dashed var(--border); padding: 20px; border-radius: 8px; margin-bottom: 15px; cursor: pointer; color: gray; }
+        :root {
+            --bg: #f8fafc;
+            --bg-secondary: #f1f5f9;
+            --text: #0f172a;
+            --text-secondary: #475569;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --primary: #0284c7;
+            --primary-hover: #0369a1;
+            --success: #16a34a;
+            --warning: #ea580c;
+            --error: #dc2626;
+            --accent: #8b5cf6;
+        }
+        
+        [data-theme="dark"] {
+            --bg: #0f172a;
+            --bg-secondary: #1e293b;
+            --text: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --card: #1e293b;
+            --border: #334155;
+            --primary: #38bdf8;
+            --primary-hover: #0284c7;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            transition: background 0.3s ease;
+        }
+
+        header {
+            width: 100%;
+            max-width: 550px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            gap: 15px;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .theme-btn, .info-btn {
+            background: var(--card);
+            border: 2px solid var(--border);
+            color: var(--text);
+            width: 45px;
+            height: 45px;
+            border-radius: 12px;
+            font-size: 1.3rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .theme-btn:hover, .info-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .card {
+            background: var(--card);
+            border: 2px solid var(--border);
+            border-radius: 16px;
+            padding: 35px;
+            width: 100%;
+            max-width: 550px;
+            margin-top: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s;
+        }
+
+        .card h2 {
+            font-size: 1.5rem;
+            margin-bottom: 25px;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+
+        input[type="tel"],
+        input[type="text"] {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 1rem;
+            border: 2px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        input[type="tel"]:focus,
+        input[type="text"]:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1);
+        }
+
+        .input-error {
+            border-color: var(--error) !important;
+        }
+
+        .input-success {
+            border-color: var(--success) !important;
+        }
+
+        .error-text {
+            font-size: 0.85rem;
+            color: var(--error);
+            margin-top: 5px;
+            display: none;
+        }
+
+        .error-text.show {
+            display: block;
+        }
+
+        .divider {
+            text-align: center;
+            margin: 25px 0;
+            position: relative;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: var(--border);
+            top: 50%;
+        }
+
+        .divider span {
+            background: var(--card);
+            padding: 0 15px;
+            position: relative;
+        }
+
+        #drop-zone {
+            border: 2px dashed var(--primary);
+            padding: 30px 20px;
+            border-radius: 12px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.3s;
+            text-align: center;
+            background: var(--bg-secondary);
+            font-weight: 500;
+        }
+
+        #drop-zone:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary-hover);
+        }
+
+        #drop-zone.has-file {
+            background: rgba(2, 132, 199, 0.1);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px 24px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-family: inherit;
+        }
+
+        #submit-btn {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            margin-top: 10px;
+        }
+
+        #submit-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(2, 132, 199, 0.3);
+        }
+
+        #submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        #new-order-btn {
+            background: var(--primary);
+            color: white;
+            margin-top: 20px;
+        }
+
+        #new-order-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        #status-banner {
+            font-size: 1rem;
+            font-weight: 600;
+            padding: 18px 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border-left: 4px solid;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-pending {
+            background: #fef08a;
+            color: #854d0e;
+            border-left-color: #eab308;
+        }
+
+        .status-taken {
+            background: #bfdbfe;
+            color: #1e40af;
+            border-left-color: #3b82f6;
+        }
+
+        .status-reached {
+            background: #fbcfe8;
+            color: #9f1239;
+            border-left-color: #ec4899;
+        }
+
+        .status-completed {
+            background: #bbf7d0;
+            color: #15803d;
+            border-left-color: #22c55e;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        #order-panel p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin: 15px 0;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .tracking-info {
+            background: var(--bg-secondary);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .tracking-info p {
+            margin: 8px 0;
+            font-size: 0.95rem;
+        }
+
+        .tracking-info strong {
+            color: var(--primary);
+        }
+
+        @media (max-width: 600px) {
+            body {
+                padding: 16px;
+            }
+
+            header {
+                margin-bottom: 20px;
+            }
+
+            header h1 {
+                font-size: 1.5rem;
+            }
+
+            .card {
+                padding: 25px;
+                border-radius: 12px;
+            }
+
+            .card h2 {
+                font-size: 1.3rem;
+                margin-bottom: 20px;
+            }
+
+            input[type="tel"],
+            input[type="text"] {
+                padding: 12px 14px;
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--card);
+            padding: 16px 24px;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            display: none;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            max-width: 90%;
+            border-left: 4px solid var(--primary);
+        }
+
+        .toast.error {
+            border-left-color: var(--error);
+        }
+
+        .toast.success {
+            border-left-color: var(--success);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <header style="width: 100%; max-width: 500px; display: flex; justify-content: space-between; align-items: center;">
-        <h1 style="color: var(--primary);">Shree Balaji</h1>
-        <button id="theme-btn" style="width: auto; padding: 8px 15px;">🌙</button>
+    <header>
+        <h1>💊 Shree Balaji Medical</h1>
+        <div class="header-actions">
+            <button class="info-btn" title="About" onclick="alert('Shree Balaji Medical Store\n\nFast & Reliable Pharmacy Delivery\nPlace your order in seconds!')">ℹ️</button>
+            <button class="theme-btn" id="theme-btn" title="Toggle Dark Mode">🌙</button>
+        </div>
     </header>
 
     <div id="order-panel" class="card">
-        <h2>Place Your Order</h2>
-        <input type="tel" id="mobile" placeholder="Mobile Number (+91...)" maxlength="10">
-        <input type="text" id="medicines" placeholder="Type medicines (e.g., Aspirin x2)...">
+        <h2>📋 Place Your Order</h2>
         
-        <p style="margin: 10px 0; color: gray;">- OR -</p>
-        
-        <div id="drop-zone">Click to Upload Prescription Image</div>
-        <input type="file" id="file-input" class="hidden" accept="image/*">
-        
-        <button id="submit-btn">Submit Order Instantly</button>
+        <div class="form-group">
+            <label for="mobile">Mobile Number *</label>
+            <input 
+                type="tel" 
+                id="mobile" 
+                placeholder="Enter 10-digit number (e.g., 9876543210)"
+                maxlength="10"
+                inputmode="numeric"
+            >
+            <div class="error-text" id="mobile-error"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="medicines">Medicine Names & Quantities *</label>
+            <input 
+                type="text" 
+                id="medicines" 
+                placeholder="e.g., Aspirin x2, Cough Syrup x1"
+            >
+            <div class="error-text" id="medicines-error"></div>
+        </div>
+
+        <div class="divider"><span>OR</span></div>
+
+        <div class="form-group">
+            <label>Upload Prescription Image</label>
+            <div id="drop-zone">
+                📷 Click to Upload or Drag & Drop
+            </div>
+            <input type="file" id="file-input" class="file-input" accept="image/*" aria-label="Upload prescription">
+            <div class="error-text" id="file-error"></div>
+        </div>
+
+        <button id="submit-btn">✓ Submit Order Instantly</button>
     </div>
 
     <div id="tracking-panel" class="card hidden">
-        <div id="status-banner">Status: Pending...</div>
-        <p style="color: gray;">Do not close this page. We are reviewing your order live.</p>
-        <button id="new-order-btn" class="hidden" style="margin-top: 20px;" onclick="location.reload()">Place New Order</button>
+        <div id="status-banner" class="status-pending">
+            <span class="spinner"></span>
+            <span>Order Sent! Waiting for store to accept...</span>
+        </div>
+
+        <div class="tracking-info">
+            <p><strong>Order ID:</strong> <span id="order-id">-</span></p>
+            <p><strong>Status:</strong> <span id="status-text">Pending</span></p>
+            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 15px;">
+                ⏳ Do not close this page. We are reviewing your order live.
+            </p>
+        </div>
+
+        <button id="new-order-btn" class="hidden" onclick="location.reload()">➕ Place Another Order</button>
     </div>
 
-    <script type="module">
-        // --- 1. FIREBASE & API SETUP (PASTE YOUR KEYS HERE) ---
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    <div id="toast" class="toast"></div>
 
-        const firebaseConfig = {
-            // 🔴 PASTE YOUR EXACT FIREBASE CONFIG OBJECT HERE:
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getDatabase, ref, push, set, onValue, off } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+        // ⚠️ FIREBASE CONFIG - Replace with your own
         const firebaseConfig = {
             apiKey: "AIzaSyBcNh75Xk9kr9Ri0zim92I3PilHdjDM07w",
             authDomain: "shree-balaji-pharma.firebaseapp.com",
@@ -59,85 +482,196 @@
             messagingSenderId: "626851982771",
             appId: "1:626851982771:web:e356909d266bd34099efc6"
         };
-        const IMGBB_API_KEY = "23bb1575c185e8c11f3a4f5a50dea3f5"; // 🔴 PASTE IMGBB KEY HERE
+
+        const IMGBB_API_KEY = "23bb1575c185e8c11f3a4f5a50dea3f5"; // Replace with your own
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // --- 2. FRONTEND LOGIC ---
         let selectedFile = null;
-        document.getElementById('drop-zone').addEventListener('click', () => document.getElementById('file-input').click());
-        document.getElementById('file-input').addEventListener('change', (e) => {
-            selectedFile = e.target.files[0];
-            document.getElementById('drop-zone').innerText = `📄 ${selectedFile.name}`;
-            document.getElementById('drop-zone').style.borderColor = "var(--primary)";
+        let currentOrderRef = null;
+
+        // --- TOAST NOTIFICATION ---
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type}`;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 4000);
+        }
+
+        // --- FORM VALIDATION ---
+        function validatePhone(phone) {
+            if (!phone || phone.length !== 10 || !/^\d+$/.test(phone)) {
+                return false;
+            }
+            return true;
+        }
+
+        function validateMedicines(meds) {
+            return meds.trim().length > 0;
+        }
+
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            if (message) {
+                errorElement.textContent = message;
+                errorElement.classList.add('show');
+                document.getElementById(elementId.replace('-error', '')).classList.add('input-error');
+            } else {
+                errorElement.classList.remove('show');
+                document.getElementById(elementId.replace('-error', '')).classList.remove('input-error');
+            }
+        }
+
+        // --- FILE UPLOAD HANDLER ---
+        document.getElementById('drop-zone').addEventListener('click', () => {
+            document.getElementById('file-input').click();
         });
 
-        // --- 3. SUBMIT & UPLOAD LOGIC ---
+        document.getElementById('file-input').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) {
+                    showError('file-error', 'File size must be less than 5MB');
+                    return;
+                }
+                selectedFile = file;
+                document.getElementById('drop-zone').textContent = `✓ ${file.name}`;
+                document.getElementById('drop-zone').classList.add('has-file');
+                showError('file-error', '');
+            }
+        });
+
+        // --- FORM SUBMISSION ---
         document.getElementById('submit-btn').addEventListener('click', async () => {
             const phone = document.getElementById('mobile').value.trim();
             const meds = document.getElementById('medicines').value.trim();
 
-            if (phone.length < 10) return alert("Enter valid 10-digit mobile number.");
-            if (!meds && !selectedFile) return alert("Enter medicines or upload a prescription.");
-
-            document.getElementById('submit-btn').innerText = "Processing... Please wait.";
-            document.getElementById('submit-btn').disabled = true;
-
-            let imageUrl = null;
-
-            // If image exists, send to ImgBB
-            if (selectedFile) {
-                const formData = new FormData();
-                formData.append("image", selectedFile);
-                try {
-                    const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, { method: "POST", body: formData });
-                    const data = await res.json();
-                    imageUrl = data.data.url; // We got the clean URL!
-                } catch (e) {
-                    alert("Image upload failed. Try again.");
-                    return;
-                }
+            // Validate
+            let hasError = false;
+            if (!validatePhone(phone)) {
+                showError('mobile-error', 'Enter valid 10-digit mobile number');
+                hasError = true;
+            } else {
+                showError('mobile-error', '');
             }
 
-            // Push to Firebase Realtime Database
-            const payload = {
-                phone: phone,
-                medicines: meds || "None (Image Uploaded)",
-                photoUrl: imageUrl,
-                status: "pending",
-                timestamp: Date.now()
-            };
+            if (!meds && !selectedFile) {
+                showError('medicines-error', 'Enter medicines OR upload prescription');
+                hasError = true;
+            } else {
+                showError('medicines-error', '');
+            }
 
-            const ordersRef = ref(db, 'orders');
-            const newOrderRef = push(ordersRef);
-            await set(newOrderRef, payload);
+            if (hasError) return;
 
-            // Shift UI & Start Listening to this specific order!
-            document.getElementById('order-panel').classList.add('hidden');
-            document.getElementById('tracking-panel').classList.remove('hidden');
+            // Disable button and show loading state
+            const btn = document.getElementById('submit-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Processing...';
 
-            const liveOrderRef = ref(db, `orders/${newOrderRef.key}`);
-            onValue(liveOrderRef, (snapshot) => {
-                const data = snapshot.val();
-                if(data) updateBuyerUI(data.status);
-            });
+            try {
+                let imageUrl = null;
+
+                // Upload image if provided
+                if (selectedFile) {
+                    const formData = new FormData();
+                    formData.append("image", selectedFile);
+                    try {
+                        const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                            method: "POST",
+                            body: formData
+                        });
+                        const data = await res.json();
+                        if (data.success) {
+                            imageUrl = data.data.url;
+                        } else {
+                            throw new Error('Image upload failed');
+                        }
+                    } catch (e) {
+                        showToast('❌ Image upload failed. Please try again.', 'error');
+                        btn.disabled = false;
+                        btn.innerHTML = '✓ Submit Order Instantly';
+                        return;
+                    }
+                }
+
+                // Push to Firebase
+                const payload = {
+                    phone: phone,
+                    medicines: meds || "Prescription uploaded",
+                    photoUrl: imageUrl || null,
+                    status: "pending",
+                    timestamp: Date.now()
+                };
+
+                const ordersRef = ref(db, 'orders');
+                const newOrderRef = await push(ordersRef);
+                await set(newOrderRef, payload);
+
+                // Show success and tracking panel
+                showToast('✓ Order placed successfully!', 'success');
+                document.getElementById('order-panel').classList.add('hidden');
+                document.getElementById('tracking-panel').classList.remove('hidden');
+                document.getElementById('order-id').textContent = newOrderRef.key.substring(0, 8).toUpperCase();
+
+                currentOrderRef = ref(db, `orders/${newOrderRef.key}`);
+                onValue(currentOrderRef, (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        updateBuyerUI(data.status);
+                    }
+                });
+
+            } catch (error) {
+                showToast('❌ Error placing order: ' + error.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = '✓ Submit Order Instantly';
+            }
         });
 
+        // --- UPDATE UI BASED ON STATUS ---
         function updateBuyerUI(status) {
             const banner = document.getElementById('status-banner');
-            if (status === 'pending') { banner.innerText = "Order Sent! Waiting for store to accept..."; banner.style.background = "#fef08a"; } 
-            else if (status === 'taken') { banner.innerText = "Order Taken! Store is preparing it."; banner.style.background = "#bfdbfe"; } 
-            else if (status === 'reached') { banner.innerText = "Order Ready! Kindly collect your order."; banner.style.background = "#fbcfe8"; } 
-            else if (status === 'completed') { 
-                banner.innerText = "Thanks for purchasing! Keep healthy & get well soon."; 
-                banner.style.background = "#bbf7d0"; 
+            const statusText = document.getElementById('status-text');
+            
+            banner.className = 'status-' + status;
+            
+            const messages = {
+                pending: { text: '⏳ Order Sent! Waiting for store to accept...', icon: '⏳' },
+                taken: { text: '👨‍💼 Order Taken! Store is preparing it.', icon: '👨‍💼' },
+                reached: { text: '✓ Order Ready! Kindly collect your order.', icon: '✓' },
+                completed: { text: '🎉 Thanks for purchasing! Keep healthy & get well soon.', icon: '🎉' }
+            };
+
+            const msg = messages[status] || messages.pending;
+            if (status !== 'completed') {
+                banner.innerHTML = '<span class="spinner"></span><span>' + msg.text + '</span>';
+            } else {
+                banner.innerHTML = msg.icon + ' ' + msg.text;
                 document.getElementById('new-order-btn').classList.remove('hidden');
             }
+            
+            statusText.textContent = status.charAt(0).toUpperCase() + status.slice(1);
         }
 
-        // Theme Toggle
-        document.getElementById('theme-btn').addEventListener('click', () => { document.body.dataset.theme = document.body.dataset.theme === "dark" ? "" : "dark"; });
+        // --- THEME TOGGLE ---
+        document.getElementById('theme-btn').addEventListener('click', () => {
+            const isDark = document.body.dataset.theme === "dark";
+            document.body.dataset.theme = isDark ? "" : "dark";
+            document.getElementById('theme-btn').textContent = isDark ? '🌙' : '☀️';
+            localStorage.setItem('theme', isDark ? 'light' : 'dark');
+        });
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            document.body.dataset.theme = "dark";
+            document.getElementById('theme-btn').textContent = '☀️';
+        }
     </script>
 </body>
 </html>
