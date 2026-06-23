@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Seller Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: sans-serif; }
+        body { background: #f1f5f9; display: flex; height: 100vh; }
+        
+        /* Auth Screen */
+        #auth-screen { position: fixed; width: 100%; height: 100%; background: #0f172a; display: flex; align-items: center; justify-content: center; z-index: 100; color: white; }
+        .auth-box { background: #1e293b; padding: 40px; border-radius: 12px; text-align: center; width: 300px; }
+        input, button { width: 100%; padding: 12px; margin-bottom: 15px; border-radius: 6px; border: none; }
+        button { background: #38bdf8; color: #0f172a; font-weight: bold; cursor: pointer; }
+
+        /* Dashboard */
+        #dashboard { width: 100%; display: none; flex-direction: column; }
+        header { background: white; padding: 20px; border-bottom: 1px solid #cbd5e1; display: flex; justify-content: space-between; align-items: center; }
+        .order-list { padding: 20px; display: grid; gap: 15px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+        
+        .order-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; border-left: 5px solid #eab308; }
+        .order-card.taken { border-left-color: #3b82f6; }
+        .order-card.reached { border-left-color: #ec4899; }
+        
+        /* Full Screen Modal */
+        #order-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; padding: 20px; }
+        .modal-content { background: white; width: 100%; max-width: 800px; height: 90vh; border-radius: 12px; display: flex; overflow: hidden; }
+        
+        .modal-details { flex: 1; padding: 30px; border-right: 1px solid #cbd5e1; overflow-y: auto; }
+        .modal-chat { flex: 1; background: #f8fafc; display: flex; flex-direction: column; }
+        
+        .action-btn { width: 100%; padding: 15px; margin-top: 10px; border-radius: 8px; font-weight: bold; color: white; border: none; cursor: pointer; }
+        
+        /* Chat Area */
+        .chat-history { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .chat-input-area { padding: 15px; background: white; border-top: 1px solid #cbd5e1; display: flex; gap: 10px; }
+        .chat-bubble { padding: 10px 15px; border-radius: 12px; max-width: 80%; font-size: 0.9rem; }
+        .chat-bubble.seller { background: #38bdf8; color: white; align-self: flex-end; }
+        .chat-bubble.buyer { background: #e2e8f0; align-self: flex-start; }
+    </style>
+</head>
+<body>
+
+    <div id="auth-screen">
+        <div class="auth-box">
+            <h2>Admin Login</h2>
+            <br>
+            <input type="password" id="admin-pass" placeholder="Enter Secure Password">
+            <button id="login-btn">Access Dashboard</button>
+        </div>
+    </div>
+
+    <div id="dashboard">
+        <header>
+            <h2>Live Orders</h2>
+            <button style="width: auto; margin: 0;" onclick="location.reload()">Refresh Data</button>
+        </header>
+        
+        <div class="order-list" id="orders-container">
+            <div class="order-card" onclick="openOrderModal('ORD_123', '9999999999', 'pending')">
+                <h3>+91 99999 99999</h3>
+                <p style="color: gray; margin-top: 5px;">Status: Pending</p>
+                <p style="margin-top: 10px; font-weight: bold;">Click to view & manage</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="order-modal">
+        <div class="modal-content">
+            
+            <div class="modal-details">
+                <button onclick="document.getElementById('order-modal').style.display='none'" style="width: auto; background: red; margin-bottom: 20px;">Close X</button>
+                <h2 id="modal-phone">Phone Number</h2>
+                <div style="background: #f1f5f9; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                    <h4>Medicines Requested:</h4>
+                    <p>Aspirin, Paracetamol</p>
+                    <br>
+                    <h4>Prescription Photo:</h4>
+                    <p style="color: gray;">No image uploaded</p>
+                </div>
+
+                <h3>Update Status:</h3>
+                <button class="action-btn" style="background: #3b82f6;" onclick="updateStatus('taken')">1. Take Order</button>
+                <button class="action-btn" style="background: #ec4899;" onclick="updateStatus('reached')">2. Order Reached / Ready</button>
+                <button class="action-btn" style="background: #22c55e;" onclick="updateStatus('completed')">3. Payment Received & Complete</button>
+                <button class="action-btn" style="background: #ef4444;" onclick="updateStatus('cancelled')">Cancel Order</button>
+            </div>
+
+            <div class="modal-chat">
+                <div style="padding: 15px; background: white; border-bottom: 1px solid #cbd5e1; font-weight: bold;">Live Chat with Buyer</div>
+                <div class="chat-history" id="seller-chat-history">
+                    <div class="chat-bubble buyer">Is my order ready?</div>
+                    <div class="chat-bubble seller">We are packing it now!</div>
+                </div>
+                <div class="chat-input-area">
+                    <input type="text" placeholder="Type message..." style="margin: 0; border: 1px solid #ccc;">
+                    <button style="margin: 0; width: 80px;">Send</button>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <script type="module">
+        // --- 1. Admin Login Logic ---
+        document.getElementById('login-btn').addEventListener('click', () => {
+            // TODO: Replace with Firebase auth
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'flex';
+        });
+
+        // --- 2. Modal Controls ---
+        window.openOrderModal = function(orderId, phone, currentStatus) {
+            document.getElementById('modal-phone').innerText = `Customer: ${phone}`;
+            document.getElementById('order-modal').style.display = 'flex';
+        }
+
+        // --- 3. State Machine Publisher ---
+        window.updateStatus = function(newStatus) {
+            // TODO: Here we will write the exact Firebase command:
+            // update(ref(db, `orders/${currentOrderId}`), { status: newStatus });
+            alert(`Order status updated to: ${newStatus} in database. User will see changes instantly.`);
+            if(newStatus === 'completed') {
+                document.getElementById('order-modal').style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>
