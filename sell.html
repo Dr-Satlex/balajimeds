@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="description" content="Admin Dashboard for Shree Balaji Medical Store">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.googleapis.com; img-src 'self' https:; style-src 'self' 'unsafe-inline';">
     <title>Shree Balaji - Admin Dashboard</title>
     <style>
         :root {
@@ -15,7 +18,6 @@
             --primary: #0284c7;
             --primary-hover: #0369a1;
             --success: #16a34a;
-            --warning: #ea580c;
             --error: #dc2626;
             --pending: #eab308;
             --taken: #3b82f6;
@@ -147,6 +149,8 @@
             justify-content: space-between;
             align-items: center;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
         header h2 {
@@ -161,6 +165,7 @@
             display: flex;
             gap: 12px;
             align-items: center;
+            flex-wrap: wrap;
         }
 
         .user-info {
@@ -169,6 +174,7 @@
             border-radius: 8px;
             font-size: 0.9rem;
             color: var(--text-secondary);
+            word-break: break-all;
         }
 
         #logout-btn {
@@ -245,67 +251,70 @@
             padding: 20px;
             cursor: pointer;
             transition: all 0.3s;
+            position: relative;
         }
 
         .order-card:hover {
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-            transform: translateY(-2px);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
         }
-
-        .order-card.pending { border-left: 5px solid var(--pending); }
-        .order-card.taken { border-left: 5px solid var(--taken); }
-        .order-card.reached { border-left: 5px solid var(--reached); }
-        .order-card.completed { border-left: 5px solid var(--completed); }
 
         .order-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
 
         .order-phone {
             font-weight: 600;
             color: var(--text);
-            font-size: 1.05rem;
+            word-break: break-all;
         }
 
         .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
             font-weight: 600;
             text-transform: uppercase;
+            color: white;
         }
 
-        .status-badge.pending { background: rgba(234, 88, 12, 0.15); color: var(--pending); }
-        .status-badge.taken { background: rgba(59, 130, 246, 0.15); color: var(--taken); }
-        .status-badge.reached { background: rgba(236, 72, 153, 0.15); color: var(--reached); }
-        .status-badge.completed { background: rgba(34, 197, 94, 0.15); color: var(--completed); }
+        .status-badge.pending { background: var(--pending); }
+        .status-badge.taken { background: var(--taken); }
+        .status-badge.reached { background: var(--reached); }
+        .status-badge.completed { background: var(--completed); }
 
         .order-medicines {
-            color: var(--text-secondary);
             font-size: 0.95rem;
-            margin-bottom: 10px;
+            color: var(--text);
+            margin-bottom: 12px;
             line-height: 1.4;
+            word-break: break-word;
         }
 
         .order-footer {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
             font-size: 0.85rem;
             color: var(--text-secondary);
-            padding-top: 12px;
-            border-top: 1px solid var(--border);
         }
 
         .has-image {
-            background: rgba(2, 132, 199, 0.15);
-            color: var(--primary);
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-weight: 500;
+            background: var(--primary);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        #empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+            display: none;
         }
 
         /* --- MODAL --- */
@@ -313,105 +322,83 @@
             position: fixed;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
+            width: 100%;
+            height: 100%;
             background: rgba(0, 0, 0, 0.5);
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
+            z-index: 200;
+            padding: 20px;
         }
 
         .modal-content {
             background: var(--card);
             border-radius: 16px;
-            padding: 30px;
-            width: 90%;
+            width: 100%;
             max-width: 500px;
             max-height: 90vh;
             overflow-y: auto;
+            padding: 30px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
         }
 
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-header h3 {
-            font-size: 1.3rem;
-            color: var(--text);
-        }
-
-        .close-btn {
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
             background: none;
             border: none;
             font-size: 1.5rem;
             cursor: pointer;
             color: var(--text-secondary);
+            transition: all 0.3s;
         }
 
-        .close-btn:hover {
+        .modal-close:hover {
             color: var(--text);
+            transform: rotate(90deg);
         }
 
-        .modal-section {
-            margin-bottom: 20px;
-        }
-
-        .modal-section label {
-            display: block;
+        .modal-title {
+            font-size: 1.3rem;
             font-weight: 600;
-            color: var(--text-secondary);
-            font-size: 0.85rem;
-            margin-bottom: 8px;
-            text-transform: uppercase;
-        }
-
-        .modal-section p {
+            margin-bottom: 20px;
             color: var(--text);
-            font-size: 0.95rem;
-            line-height: 1.5;
         }
 
-        #prescription-status {
-            display: inline-block;
-            padding: 6px 12px;
-            border-radius: 6px;
-            background: rgba(22, 163, 74, 0.15);
-            color: var(--success);
+        .modal-info {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .modal-label {
             font-size: 0.85rem;
-            font-weight: 500;
+            color: var(--text-secondary);
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-bottom: 5px;
         }
 
-        #modal-img-link {
-            display: inline-block;
-            margin-top: 8px;
-            padding: 8px 16px;
-            background: var(--primary);
-            color: white;
-            border-radius: 6px;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.9rem;
-        }
-
-        #modal-img-link:hover {
-            background: var(--primary-hover);
+        .modal-value {
+            font-size: 1rem;
+            color: var(--text);
+            word-break: break-word;
+            line-height: 1.4;
         }
 
         .modal-actions {
             display: flex;
             gap: 10px;
-            margin-top: 25px;
-            padding-top: 20px;
-            border-top: 2px solid var(--border);
+            margin-top: 20px;
+            flex-wrap: wrap;
         }
 
-        .modal-actions button {
+        .action-btn {
             flex: 1;
+            min-width: 120px;
             padding: 12px;
             border: none;
             border-radius: 8px;
@@ -421,138 +408,68 @@
             font-size: 0.9rem;
         }
 
-        .modal-actions button:disabled {
+        .action-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
         }
 
-        .btn-taken {
-            background: var(--taken);
+        .action-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        .action-btn.primary {
+            background: var(--primary);
             color: white;
         }
 
-        .btn-taken:hover:not(:disabled) {
-            background: #2563eb;
+        .action-btn.primary:hover {
+            background: var(--primary-hover);
         }
 
-        .btn-reached {
-            background: var(--reached);
-            color: white;
-        }
-
-        .btn-reached:hover:not(:disabled) {
-            background: #db2777;
-        }
-
-        .btn-completed {
-            background: var(--completed);
-            color: white;
-        }
-
-        .btn-completed:hover:not(:disabled) {
-            background: #15803d;
-        }
-
-        #empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: var(--text-secondary);
-        }
-
-        #empty-state p {
-            font-size: 1.1rem;
-        }
-
-        .spinner {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 3px solid rgba(2, 132, 199, 0.3);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            background: var(--success);
-            color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-            display: none;
-            z-index: 2000;
-            animation: slideUp 0.3s ease;
-        }
-
-        .toast.error {
-            background: var(--error);
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        /* --- CHAT SECTION IN MODAL --- */
+        /* --- CHAT --- */
         #chat-section-modal {
             display: none;
-            margin-top: 25px;
+            margin-top: 20px;
             padding-top: 20px;
             border-top: 2px solid var(--border);
         }
 
-        #chat-section-modal h4 {
-            font-size: 1rem;
-            margin-bottom: 12px;
+        .chat-title {
+            font-size: 0.95rem;
+            font-weight: 600;
             color: var(--text);
+            margin-bottom: 12px;
         }
 
-        #chat-container-modal {
-            display: flex;
-            flex-direction: column;
-            height: 300px;
+        .messages-container-modal {
             background: var(--bg-secondary);
             border-radius: 8px;
-            border: 2px solid var(--border);
-            overflow: hidden;
-        }
-
-        #chat-messages-modal {
-            flex: 1;
-            overflow-y: auto;
             padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+            height: 250px;
+            overflow-y: auto;
+            margin-bottom: 12px;
+            border: 2px solid var(--border);
         }
 
         .message-modal {
+            margin-bottom: 10px;
             display: flex;
-            gap: 6px;
-            margin-bottom: 4px;
+            flex-direction: column;
+            gap: 3px;
         }
 
         .message-modal.buyer {
-            justify-content: flex-end;
+            align-items: flex-end;
+        }
+
+        .message-modal.seller {
+            align-items: flex-start;
         }
 
         .message-content-modal {
-            max-width: 70%;
             padding: 8px 12px;
-            border-radius: 8px;
+            border-radius: 6px;
+            max-width: 85%;
             word-wrap: break-word;
             font-size: 0.9rem;
         }
@@ -563,24 +480,20 @@
         }
 
         .message-modal.seller .message-content-modal {
-            background: var(--card);
+            background: var(--border);
             color: var(--text);
-            border: 1px solid var(--border);
         }
 
-        #chat-input-area-modal {
+        .chat-input-group {
             display: flex;
-            gap: 8px;
-            padding: 10px;
-            background: var(--card);
-            border-top: 2px solid var(--border);
+            gap: 10px;
         }
 
         #chat-input-modal {
             flex: 1;
-            padding: 8px 12px;
-            border: 2px solid var(--border);
+            padding: 10px 12px;
             border-radius: 6px;
+            border: 2px solid var(--border);
             background: var(--bg);
             color: var(--text);
             font-family: inherit;
@@ -588,30 +501,90 @@
         }
 
         #chat-input-modal:focus {
-            outline: none;
             border-color: var(--primary);
+            outline: none;
         }
 
         #send-btn-modal {
-            width: auto;
-            padding: 8px 16px;
+            padding: 10px 16px;
             background: var(--primary);
             color: white;
             border: none;
             border-radius: 6px;
             font-weight: 600;
             cursor: pointer;
-            font-size: 0.85rem;
             transition: all 0.3s;
         }
 
-        #send-btn-modal:hover:not(:disabled) {
+        #send-btn-modal:hover {
             background: var(--primary-hover);
         }
 
-        #send-btn-modal:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
+        /* --- TOAST --- */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--card);
+            padding: 16px 24px;
+            border-radius: 10px;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            max-width: 300px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast.success { border-left-color: var(--success); }
+        .toast.error { border-left-color: var(--error); }
+
+        .spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+            margin-right: 6px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 640px) {
+            .stats {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .modal-content {
+                padding: 20px;
+            }
+
+            .messages-container-modal {
+                height: 200px;
+            }
+
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-actions {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -619,12 +592,12 @@
     <!-- AUTH SCREEN -->
     <div id="auth-screen">
         <div class="auth-container">
-            <h2>👨‍💼 Admin Login</h2>
-            <p>Access the store dashboard</p>
+            <h2>Admin Login</h2>
+            <p>Shree Balaji Medical Store</p>
             <div class="auth-form">
-                <input type="email" id="admin-email" placeholder="Email" autocomplete="email">
+                <input type="email" id="admin-email" placeholder="Admin Email" autocomplete="email">
                 <input type="password" id="admin-pass" placeholder="Password" autocomplete="current-password">
-                <button id="login-btn">Login</button>
+                <button id="login-btn">Sign In</button>
                 <div class="login-error" id="login-error"></div>
             </div>
         </div>
@@ -633,108 +606,104 @@
     <!-- DASHBOARD -->
     <div id="dashboard">
         <header>
-            <h2>📊 Order Dashboard</h2>
+            <h2>📊 Order Management</h2>
             <div class="header-actions">
-                <div class="user-info">👤 <span id="user-email">Admin</span></div>
-                <button id="logout-btn">🚪 Logout</button>
+                <div class="user-info" id="user-email">Signed in</div>
+                <button id="logout-btn">Logout</button>
             </div>
         </header>
 
         <div class="orders-header">
-            <h3>📦 Order Statistics</h3>
+            <h3>Orders Overview</h3>
             <div class="stats">
                 <div class="stat-card pending">
                     <div class="stat-count" id="count-pending">0</div>
-                    <div class="stat-label">⏳ PENDING</div>
+                    <div class="stat-label">Pending</div>
                 </div>
                 <div class="stat-card taken">
                     <div class="stat-count" id="count-taken">0</div>
-                    <div class="stat-label">👨‍💼 TAKEN</div>
+                    <div class="stat-label">Taken</div>
                 </div>
                 <div class="stat-card reached">
                     <div class="stat-count" id="count-reached">0</div>
-                    <div class="stat-label">✓ REACHED</div>
+                    <div class="stat-label">Ready</div>
                 </div>
                 <div class="stat-card completed">
                     <div class="stat-count" id="count-completed">0</div>
-                    <div class="stat-label">🎉 COMPLETED</div>
+                    <div class="stat-label">Completed</div>
                 </div>
             </div>
         </div>
 
         <div class="orders-list" id="orders-container">
-            <div id="empty-state" style="grid-column: 1 / -1;">
-                <p>📭 No pending orders at the moment</p>
+            <div id="empty-state">
+                <div style="font-size: 3rem; margin-bottom: 10px;">📭</div>
+                <p>No orders yet. Check back later!</p>
             </div>
         </div>
     </div>
 
-    <!-- MODAL -->
+    <!-- ORDER MODAL -->
     <div id="order-modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3>Order Details</h3>
-                <button class="close-btn" onclick="closeModal()">✕</button>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+
+            <div class="modal-title">Order Details</div>
+
+            <div class="modal-info">
+                <div class="modal-label">Customer Phone</div>
+                <div class="modal-value" id="modal-phone">---</div>
             </div>
 
-            <div class="modal-section">
-                <label>Customer Phone</label>
-                <p id="modal-phone">-</p>
+            <div class="modal-info">
+                <div class="modal-label">Medicines Required</div>
+                <div class="modal-value" id="modal-meds">---</div>
             </div>
 
-            <div class="modal-section">
-                <label>Medicines Required</label>
-                <p id="modal-meds">-</p>
+            <div class="modal-info">
+                <div class="modal-label">Order Time</div>
+                <div class="modal-value" id="modal-time">---</div>
             </div>
 
-            <div class="modal-section">
-                <label>Order Date & Time</label>
-                <p id="modal-time">-</p>
-            </div>
-
-            <div class="modal-section">
-                <label>Prescription</label>
-                <p>
-                    <span id="prescription-status">No prescription</span>
-                    <a id="modal-img-link" target="_blank" style="display: none;">📷 View Prescription</a>
-                </p>
-            </div>
-
-            <!-- CHAT SECTION -->
-            <div id="chat-section-modal">
-                <h4>💬 Chat with Customer</h4>
-                <div id="chat-container-modal">
-                    <div id="chat-messages-modal"></div>
-                    <div id="chat-input-area-modal">
-                        <input type="text" id="chat-input-modal" placeholder="Type message...">
-                        <button id="send-btn-modal">Send</button>
-                    </div>
+            <div class="modal-info">
+                <div class="modal-label">Prescription</div>
+                <div class="modal-value">
+                    <div id="prescription-status">No prescription</div>
+                    <a id="modal-img-link" href="#" target="_blank" style="display: none; color: var(--primary); text-decoration: underline; margin-top: 8px;">📷 View Prescription</a>
                 </div>
             </div>
 
             <div class="modal-actions">
-                <button class="btn-taken" onclick="updateStatus('taken')">👨‍💼 Take Order</button>
-                <button class="btn-reached" onclick="updateStatus('reached')">✓ Mark Ready</button>
-                <button class="btn-completed" onclick="updateStatus('completed')">🎉 Complete</button>
+                <button class="action-btn primary" onclick="updateStatus('taken')">👨‍💼 Take Order</button>
+                <button class="action-btn primary" onclick="updateStatus('reached')">✓ Ready</button>
+                <button class="action-btn primary" onclick="updateStatus('completed')">🎉 Completed</button>
+            </div>
+
+            <div id="chat-section-modal">
+                <div class="chat-title">💬 Chat with Customer</div>
+                <div class="messages-container-modal" id="chat-messages-modal"></div>
+                <div class="chat-input-group">
+                    <input type="text" id="chat-input-modal" placeholder="Type message..." maxlength="1000">
+                    <button id="send-btn-modal">Send</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <div id="toast" class="toast"></div>
-
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-        import { getDatabase, ref, push, set, onValue, off, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js';
+        import { getDatabase, ref, onValue, off, update, push, set } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js';
 
+        // ===== CONFIGURATION (Replace with your Firebase config) =====
         const firebaseConfig = {
-            apiKey: "AIzaSyBcNh75Xk9kr9Ri0zim92I3PilHdjDM07w",
-            authDomain: "shree-balaji-pharma.firebaseapp.com",
-            databaseURL: "https://shree-balaji-pharma-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "shree-balaji-pharma",
-            storageBucket: "shree-balaji-pharma.firebasestorage.app",
-            messagingSenderId: "626851982771",
-            appId: "1:626851982771:web:e356909d266bd34099efc6"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            databaseURL: "YOUR_DATABASE_URL",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_ID",
+            appId: "YOUR_APP_ID"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -744,78 +713,87 @@
         let currentViewingOrderId = null;
         let ordersListener = null;
         let chatListener = null;
+        let isLoggedIn = false;
 
-        // --- SESSION PERSISTENCE ---
+        // ===== UTILITIES =====
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ===== AUTH STATE =====
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                // User is logged in - show dashboard
-                document.getElementById('user-email').textContent = user.email.split('@')[0];
+                isLoggedIn = true;
                 document.getElementById('auth-screen').style.display = 'none';
                 document.getElementById('dashboard').style.display = 'flex';
+                document.getElementById('user-email').textContent = escapeHtml(user.email);
                 listenForOrders();
             } else {
-                // User is logged out
+                isLoggedIn = false;
                 document.getElementById('auth-screen').style.display = 'flex';
                 document.getElementById('dashboard').style.display = 'none';
-                if (ordersListener) {
-                    off(ordersListener);
-                }
-                if (chatListener) {
-                    off(chatListener);
-                }
+                cleanupListeners();
             }
         });
 
-        // TOAST NOTIFICATION
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.className = `toast ${type}`;
-            toast.style.display = 'block';
-            setTimeout(() => {
-                toast.style.display = 'none';
-            }, 4000);
-        }
-
-        // LOGIN
+        // ===== LOGIN =====
         document.getElementById('login-btn').addEventListener('click', async () => {
             const email = document.getElementById('admin-email').value.trim();
-            const pass = document.getElementById('admin-pass').value;
+            const password = document.getElementById('admin-pass').value.trim();
 
-            if (!email || !pass) {
-                showLoginError('Enter email and password');
+            if (!email || !password) {
+                showError('login-error', 'Please enter both email and password');
                 return;
             }
 
             const btn = document.getElementById('login-btn');
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner"></span> Logging in...';
+            btn.innerHTML = '<span class="spinner"></span> Signing in...';
 
             try {
-                await signInWithEmailAndPassword(auth, email, pass);
-                showToast('✓ Login successful!', 'success');
+                await signInWithEmailAndPassword(auth, email, password);
+                showToast('✓ Logged in successfully', 'success');
             } catch (error) {
-                const errorMsg = error.code === 'auth/user-not-found' ? 'User not found'
-                    : error.code === 'auth/wrong-password' ? 'Wrong password'
-                    : error.code === 'auth/invalid-email' ? 'Invalid email'
-                    : error.message;
-                showLoginError('❌ ' + errorMsg);
+                const errorMessages = {
+                    'auth/invalid-email': 'Invalid email address',
+                    'auth/user-disabled': 'Account is disabled',
+                    'auth/user-not-found': 'User not found',
+                    'auth/wrong-password': 'Incorrect password',
+                    'auth/too-many-requests': 'Too many login attempts. Try again later.'
+                };
+                const message = errorMessages[error.code] || error.message;
+                showError('login-error', message);
+                showToast('❌ ' + message, 'error');
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = 'Login';
+                btn.innerHTML = 'Sign In';
             }
         });
 
-        function showLoginError(message) {
-            const errorEl = document.getElementById('login-error');
-            errorEl.textContent = message;
-            errorEl.classList.add('show');
-            setTimeout(() => {
-                errorEl.classList.remove('show');
-            }, 4000);
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            if (message) {
+                errorElement.textContent = message;
+                errorElement.classList.add('show');
+            } else {
+                errorElement.classList.remove('show');
+            }
         }
 
-        // LOGOUT
+        // ===== LOGOUT =====
         document.getElementById('logout-btn').addEventListener('click', async () => {
             if (confirm('Are you sure you want to logout?')) {
                 try {
@@ -829,8 +807,12 @@
             }
         });
 
-        // LISTEN FOR ORDERS
+        // ===== LISTEN FOR ORDERS =====
         function listenForOrders() {
+            if (ordersListener) {
+                off(ordersListener);
+            }
+
             const ordersRef = ref(db, 'orders');
             ordersListener = ordersRef;
 
@@ -846,23 +828,21 @@
                     const orderId = childSnapshot.key;
                     const data = childSnapshot.val();
                     orders.push({ orderId, ...data });
-                    stats[data.status]++;
+                    stats[data.status] = (stats[data.status] || 0) + 1;
                 });
 
-                orders.sort((a, b) => {
-                    const statusOrder = { pending: 0, taken: 1, reached: 2, completed: 3 };
-                    return statusOrder[a.status] - statusOrder[b.status];
-                });
+                // Sort by status
+                const statusOrder = { pending: 0, taken: 1, reached: 2, completed: 3 };
+                orders.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
 
                 if (orders.length === 0) {
                     emptyState.style.display = 'block';
                 } else {
                     emptyState.style.display = 'none';
                     orders.forEach(order => {
-                        if (order.status !== 'completed') {
-                            const card = createOrderCard(order.orderId, order);
-                            container.appendChild(card);
-                        }
+                        // Show all orders including completed
+                        const card = createOrderCard(order.orderId, order);
+                        container.appendChild(card);
                     });
                 }
 
@@ -873,44 +853,47 @@
             });
         }
 
-        // CREATE ORDER CARD
+        // ===== CREATE ORDER CARD =====
         function createOrderCard(orderId, data) {
             const card = document.createElement('div');
             card.className = `order-card ${data.status}`;
 
             const timeAgo = getTimeAgo(data.timestamp);
 
+            const medicinesText = escapeHtml(data.medicines);
+            const phoneText = escapeHtml(data.phone);
+
             card.innerHTML = `
                 <div class="order-header">
-                    <span class="order-phone">📞 ${data.phone}</span>
+                    <span class="order-phone">📞 ${phoneText}</span>
                     <span class="status-badge ${data.status}">${data.status}</span>
                 </div>
-                <div class="order-medicines">${data.medicines}</div>
+                <div class="order-medicines">${medicinesText}</div>
                 <div class="order-footer">
                     <span class="order-time">⏱️ ${timeAgo}</span>
                     ${data.photoUrl ? '<span class="has-image">📷 Prescription</span>' : ''}
                 </div>
             `;
 
-            card.onclick = () => {
+            card.addEventListener('click', () => {
                 currentViewingOrderId = orderId;
                 openModal(data, orderId);
-            };
+            });
 
             return card;
         }
 
-        // OPEN MODAL
+        // ===== OPEN MODAL =====
         function openModal(data, orderId) {
-            document.getElementById('modal-phone').textContent = `📞 ${data.phone}`;
-            document.getElementById('modal-meds').textContent = data.medicines;
+            document.getElementById('modal-phone').textContent = escapeHtml(data.phone);
+            document.getElementById('modal-meds').textContent = escapeHtml(data.medicines);
             document.getElementById('modal-time').textContent = new Date(data.timestamp).toLocaleString('en-IN');
 
             const imgLink = document.getElementById('modal-img-link');
             const prescriptionStatus = document.getElementById('prescription-status');
 
             if (data.photoUrl) {
-                imgLink.href = data.photoUrl;
+                imgLink.href = escapeHtml(data.photoUrl);
                 imgLink.style.display = 'inline-block';
                 prescriptionStatus.textContent = '✓ Prescription uploaded';
             } else {
@@ -929,29 +912,30 @@
             document.getElementById('order-modal').style.display = 'flex';
         }
 
-        // CLOSE MODAL
+        // ===== CLOSE MODAL =====
         window.closeModal = function() {
             document.getElementById('order-modal').style.display = 'none';
+            currentViewingOrderId = null;
             if (chatListener) {
                 off(chatListener);
+                chatListener = null;
             }
         };
 
-        // KEYBOARD: ESC to close modal
+        // ===== KEYBOARD & OUTSIDE CLICK =====
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && document.getElementById('order-modal').style.display === 'flex') {
                 closeModal();
             }
         });
 
-        // Click outside modal to close
         document.getElementById('order-modal').addEventListener('click', (e) => {
             if (e.target === document.getElementById('order-modal')) {
                 closeModal();
             }
         });
 
-        // --- CHAT FUNCTIONALITY ---
+        // ===== CHAT FUNCTIONALITY =====
         function loadChatMessages(orderId) {
             const chatRef = ref(db, `chats/${orderId}`);
 
@@ -976,7 +960,7 @@
 
                     const messageContent = document.createElement('div');
                     messageContent.className = 'message-content-modal';
-                    messageContent.textContent = msg.text;
+                    messageContent.textContent = escapeHtml(msg.text);
 
                     messageDiv.appendChild(messageContent);
                     messagesContainer.appendChild(messageDiv);
@@ -992,12 +976,16 @@
 
             if (!message || !currentViewingOrderId) return;
 
+            if (message.length > 1000) {
+                showToast('❌ Message is too long (max 1000 characters)', 'error');
+                return;
+            }
+
             try {
                 const chatRef = ref(db, `chats/${currentViewingOrderId}`);
-                const newMessageRef = await push(chatRef);
-                await set(newMessageRef, {
+                await push(chatRef, {
                     sender: 'seller',
-                    text: message,
+                    text: escapeHtml(message),
                     timestamp: Date.now()
                 });
 
@@ -1008,19 +996,20 @@
         });
 
         document.getElementById('chat-input-modal').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
                 document.getElementById('send-btn-modal').click();
             }
         });
 
-        // UPDATE STATUS
+        // ===== UPDATE STATUS =====
         window.updateStatus = async function(newStatus) {
             if (!currentViewingOrderId) return;
 
             const btn = event.target;
             const originalText = btn.textContent;
             btn.disabled = true;
-            btn.innerHTML = '<span class="spinner"></span> ' + btn.textContent;
+            btn.innerHTML = '<span class="spinner"></span> Updating...';
 
             try {
                 const orderRef = ref(db, `orders/${currentViewingOrderId}`);
@@ -1031,8 +1020,7 @@
                     closeModal();
                 } else {
                     showToast('✓ Status updated successfully!', 'success');
-                    
-                    // Show chat section if transitioning to 'taken'
+
                     if (newStatus === 'taken') {
                         document.getElementById('chat-section-modal').style.display = 'block';
                         loadChatMessages(currentViewingOrderId);
@@ -1046,7 +1034,7 @@
             }
         };
 
-        // TIME AGO
+        // ===== TIME AGO =====
         function getTimeAgo(timestamp) {
             const now = Date.now();
             const diff = now - timestamp;
@@ -1059,6 +1047,23 @@
             if (hours < 24) return `${hours}h ago`;
             return `${days}d ago`;
         }
+
+        // ===== CLEANUP =====
+        function cleanupListeners() {
+            if (ordersListener) {
+                off(ordersListener);
+                ordersListener = null;
+            }
+            if (chatListener) {
+                off(chatListener);
+                chatListener = null;
+            }
+            currentViewingOrderId = null;
+        }
+
+        window.addEventListener('beforeunload', () => {
+            cleanupListeners();
+        });
     </script>
 </body>
 </html>
