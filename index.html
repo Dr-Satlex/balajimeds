@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="description" content="Quick Order System for Shree Balaji Medical Store">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://www.gstatic.com https://www.googleapis.com https://api.imgbb.com; img-src 'self' https:; style-src 'self' 'unsafe-inline';">
     <title>Shree Balaji Medical Store - Quick Order</title>
     <style>
         :root {
@@ -231,12 +234,12 @@
             font-family: inherit;
         }
 
-        #submit-btn {
+        #submit-btn, #new-order-btn {
             background: linear-gradient(135deg, var(--primary), var(--accent));
             color: white;
         }
 
-        #submit-btn:hover:not(:disabled) {
+        #submit-btn:hover:not(:disabled), #new-order-btn:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(2, 132, 199, 0.3);
         }
@@ -246,118 +249,122 @@
             cursor: not-allowed;
         }
 
-        .status-pending {
-            background: rgba(234, 88, 12, 0.1);
-            border-left: 4px solid var(--warning);
-            color: var(--warning);
-        }
-
-        .status-taken {
-            background: rgba(2, 132, 199, 0.1);
-            border-left: 4px solid var(--primary);
-            color: var(--primary);
-        }
-
-        .status-reached {
-            background: rgba(22, 163, 74, 0.1);
-            border-left: 4px solid var(--success);
-            color: var(--success);
-        }
-
-        .status-completed {
-            background: rgba(22, 163, 74, 0.1);
-            border-left: 4px solid var(--success);
-            color: var(--success);
-        }
-
-        #status-banner {
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 500;
-        }
-
         .spinner {
             display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 3px solid rgba(2, 132, 199, 0.3);
-            border-top-color: var(--primary);
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
+            border-top-color: white;
             animation: spin 0.8s linear infinite;
+            margin-right: 8px;
         }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
 
-        .tracking-info {
-            background: var(--bg-secondary);
-            padding: 20px;
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--card);
+            padding: 16px 24px;
             border-radius: 10px;
-            margin: 20px 0;
+            border-left: 4px solid var(--primary);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            max-width: 300px;
         }
 
-        .tracking-info p {
-            margin: 10px 0;
-            font-size: 0.95rem;
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
         }
 
-        #new-order-btn {
-            background: var(--success);
-            color: white;
-            margin-top: 15px;
+        .toast.success { border-left-color: var(--success); }
+        .toast.error { border-left-color: var(--error); }
+        .toast.warning { border-left-color: var(--warning); }
+
+        #tracking-panel {
+            width: 100%;
+            max-width: 550px;
         }
 
-        #new-order-btn:hover {
-            background: #15803d;
-            transform: translateY(-2px);
-        }
-
-        .file-input {
-            display: none;
-        }
-
-        /* ---- CHAT STYLES ---- */
-        #chat-container {
-            display: flex;
-            flex-direction: column;
-            height: 400px;
-            background: var(--bg-secondary);
+        .status-banner {
+            width: 100%;
+            padding: 20px;
             border-radius: 12px;
-            margin-top: 15px;
-            border: 2px solid var(--border);
-            overflow: hidden;
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            color: white;
         }
 
-        #chat-messages {
-            flex: 1;
-            overflow-y: auto;
+        .status-pending { background: linear-gradient(135deg, #eab308, #ca8a04); }
+        .status-taken { background: linear-gradient(135deg, #3b82f6, #1d4ed8); }
+        .status-reached { background: linear-gradient(135deg, #ec4899, #be185d); }
+        .status-completed { background: linear-gradient(135deg, #22c55e, #16a34a); }
+
+        .info-box {
+            background: var(--bg-secondary);
+            border-left: 4px solid var(--primary);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 5px;
+            color: var(--text);
+        }
+
+        #chat-section {
+            margin-top: 20px;
+        }
+
+        .messages-container {
+            background: var(--bg-secondary);
+            border-radius: 10px;
             padding: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
+            height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            border: 2px solid var(--border);
         }
 
         .message {
+            margin-bottom: 12px;
             display: flex;
-            gap: 8px;
-            margin-bottom: 5px;
+            flex-direction: column;
+            gap: 4px;
         }
 
         .message.buyer {
-            justify-content: flex-end;
+            align-items: flex-end;
+        }
+
+        .message.seller {
+            align-items: flex-start;
         }
 
         .message-content {
-            max-width: 75%;
             padding: 10px 14px;
-            border-radius: 10px;
+            border-radius: 8px;
+            max-width: 85%;
             word-wrap: break-word;
-            font-size: 0.95rem;
         }
 
         .message.buyer .message-content {
@@ -366,221 +373,224 @@
         }
 
         .message.seller .message-content {
-            background: var(--card);
+            background: var(--border);
             color: var(--text);
-            border: 1px solid var(--border);
         }
 
         .message-time {
             font-size: 0.75rem;
             color: var(--text-secondary);
-            padding: 0 5px;
-            align-self: flex-end;
+            padding: 0 8px;
         }
 
-        #chat-input-area {
+        .chat-input-group {
             display: flex;
             gap: 10px;
-            padding: 12px;
-            background: var(--card);
-            border-top: 2px solid var(--border);
         }
 
         #chat-input {
             flex: 1;
             padding: 10px 14px;
-            border: 2px solid var(--border);
             border-radius: 8px;
+            border: 2px solid var(--border);
             background: var(--bg);
             color: var(--text);
             font-family: inherit;
-            font-size: 0.95rem;
         }
 
         #chat-input:focus {
-            outline: none;
             border-color: var(--primary);
+            outline: none;
         }
 
         #send-btn {
-            width: auto;
             padding: 10px 20px;
             background: var(--primary);
             color: white;
+            border: none;
             border-radius: 8px;
-            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 100px;
         }
 
-        #send-btn:hover:not(:disabled) {
+        #send-btn:hover {
             background: var(--primary-hover);
         }
 
-        .toast {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            background: var(--success);
-            color: white;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        #file-input {
             display: none;
-            z-index: 1000;
-            max-width: 300px;
-            animation: slideUp 0.3s ease;
         }
 
-        .toast.error {
-            background: var(--error);
-        }
-
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
+        @media (max-width: 640px) {
+            .card {
+                padding: 25px;
             }
-            to {
-                opacity: 1;
-                transform: translateY(0);
+
+            header h1 {
+                font-size: 1.4rem;
+            }
+
+            .messages-container {
+                height: 250px;
             }
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>💊 Shree Balaji Medical</h1>
+        <h1>💊 Quick Order</h1>
         <div class="header-actions">
-            <button id="theme-btn" class="theme-btn">🌙</button>
+            <button class="theme-btn" id="theme-btn" aria-label="Toggle theme">🌙</button>
         </div>
     </header>
 
     <div id="order-panel" class="card">
-        <h2>Quick Medicine Order</h2>
+        <h2>Place Your Order</h2>
 
         <div class="form-group">
-            <label for="mobile">📞 Mobile Number</label>
-            <input type="tel" id="mobile" placeholder="10-digit number" maxlength="10">
+            <label for="mobile">Mobile Number *</label>
+            <input type="tel" id="mobile" placeholder="10-digit mobile number" inputmode="numeric" maxlength="10" autocomplete="tel">
             <div class="error-text" id="mobile-error"></div>
         </div>
 
         <div class="form-group">
-            <label for="medicines">💊 Medicines Needed</label>
-            <input type="text" id="medicines" placeholder="e.g., Amoxicillin, Paracetamol">
+            <label for="medicines">Medicines Required *</label>
+            <input type="text" id="medicines" placeholder="e.g., Aspirin, Ibuprofen, etc." autocomplete="off">
             <div class="error-text" id="medicines-error"></div>
         </div>
 
         <div class="divider"><span>OR</span></div>
 
         <div class="form-group">
-            <label>📷 Upload Prescription</label>
-            <div id="drop-zone">
-                📷 Click to Upload or Drag & Drop
-            </div>
-            <input type="file" id="file-input" class="file-input" accept="image/*" aria-label="Upload prescription">
+            <label for="file-input">Upload Prescription</label>
+            <div id="drop-zone">📄 Click to upload or drag prescription image</div>
             <div class="error-text" id="file-error"></div>
+            <input type="file" id="file-input" accept="image/*" />
         </div>
 
         <button id="submit-btn">✓ Submit Order Instantly</button>
     </div>
 
-    <div id="tracking-panel" class="card hidden">
+    <div id="tracking-panel" class="hidden card">
+        <h2>Order Tracking</h2>
+        
         <div id="status-banner" class="status-pending">
             <span class="spinner"></span>
             <span>Order Sent! Waiting for store to accept...</span>
         </div>
 
-        <div class="tracking-info">
-            <p><strong>Order ID:</strong> <span id="order-id">-</span></p>
-            <p><strong>Status:</strong> <span id="status-text">Pending</span></p>
-            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 15px;">
-                ⏳ Do not close this page. We are reviewing your order live.
-            </p>
+        <div class="info-box">
+            <strong>Order ID:</strong>
+            <span id="order-id">---</span>
         </div>
 
-        <!-- CHAT SECTION (shown when order is accepted) -->
+        <div class="info-box">
+            <strong>Status:</strong>
+            <span id="status-text">Pending</span>
+        </div>
+
         <div id="chat-section" class="hidden">
-            <h3 style="margin-top: 25px; margin-bottom: 15px;">💬 Chat with Store</h3>
-            <div id="chat-container">
-                <div id="chat-messages"></div>
-                <div id="chat-input-area">
-                    <input type="text" id="chat-input" placeholder="Type your message...">
-                    <button id="send-btn">Send</button>
-                </div>
+            <h3 style="margin-bottom: 12px; font-size: 1rem;">💬 Chat with Store</h3>
+            <div class="messages-container" id="chat-messages"></div>
+            <div class="chat-input-group">
+                <input type="text" id="chat-input" placeholder="Type your message..." />
+                <button id="send-btn">Send</button>
             </div>
         </div>
 
-        <button id="new-order-btn" class="hidden" onclick="location.reload()">➕ Place Another Order</button>
+        <button id="new-order-btn" class="hidden" style="margin-top: 20px;">+ Place New Order</button>
     </div>
 
-    <div id="toast" class="toast"></div>
-
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-        import { getDatabase, ref, push, set, onValue, off, update } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js';
+        import { getDatabase, ref, push, set, onValue, off, update } from 'https://www.gstatic.com/firebasejs/10.7.0/firebase-database.js';
 
+        // ===== CONFIGURATION (Replace with your Firebase config) =====
         const firebaseConfig = {
-            apiKey: "AIzaSyBcNh75Xk9kr9Ri0zim92I3PilHdjDM07w",
-            authDomain: "shree-balaji-pharma.firebaseapp.com",
-            databaseURL: "https://shree-balaji-pharma-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "shree-balaji-pharma",
-            storageBucket: "shree-balaji-pharma.firebasestorage.app",
-            messagingSenderId: "626851982771",
-            appId: "1:626851982771:web:e356909d266bd34099efc6"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            databaseURL: "YOUR_DATABASE_URL",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_ID",
+            appId: "YOUR_APP_ID"
         };
 
-        const IMGBB_API_KEY = "23bb1575c185e8c11f3a4f5a50dea3f5";
+        // Note: Replace with your actual ImgBB API key from environment or backend
+        const IMGBB_API_KEY = "YOUR_IMGBB_API_KEY";
+
+        // ===== SECURITY: Never expose keys in frontend - use environment variables or backend proxy =====
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
         let selectedFile = null;
-        let currentOrderRef = null;
         let currentOrderId = null;
-        let chatListener = null;
+        let currentOrderRef = null;
         let orderListener = null;
+        let chatListener = null;
+        let isSubmitting = false;
 
-        // --- SESSION PERSISTENCE ---
+        // ===== UTILITIES =====
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ===== SESSION MANAGEMENT =====
         function saveSessionData(orderId, phone) {
-            localStorage.setItem('currentOrderId', orderId);
-            localStorage.setItem('currentPhone', phone);
-            localStorage.setItem('sessionTime', Date.now());
+            const sessionData = {
+                orderId: orderId,
+                phone: phone,
+                timestamp: Date.now()
+            };
+            sessionStorage.setItem('currentOrder', JSON.stringify(sessionData));
         }
 
         function loadSessionData() {
-            const orderId = localStorage.getItem('currentOrderId');
-            const phone = localStorage.getItem('currentPhone');
-            const sessionTime = localStorage.getItem('sessionTime');
+            const data = sessionStorage.getItem('currentOrder');
+            if (data) {
+                const sessionData = JSON.parse(data);
+                const isExpired = Date.now() - sessionData.timestamp > 24 * 60 * 60 * 1000; // 24 hours
 
-            if (orderId && phone) {
-                // Session exists
-                currentOrderId = orderId;
-                restoreOrderState(orderId, phone);
-                return true;
+                if (!isExpired) {
+                    currentOrderId = sessionData.orderId;
+                    resumeOrderTracking(sessionData.orderId, sessionData.phone);
+                } else {
+                    sessionStorage.removeItem('currentOrder');
+                }
             }
-            return false;
         }
 
         function clearSessionData() {
-            localStorage.removeItem('currentOrderId');
-            localStorage.removeItem('currentPhone');
-            localStorage.removeItem('sessionTime');
+            sessionStorage.removeItem('currentOrder');
+            currentOrderId = null;
         }
 
-        // Restore state from Firebase when page loads
-        async function restoreOrderState(orderId, phone) {
+        function resumeOrderTracking(orderId, phone) {
             document.getElementById('order-panel').classList.add('hidden');
             document.getElementById('tracking-panel').classList.remove('hidden');
             document.getElementById('order-id').textContent = orderId.substring(0, 8).toUpperCase();
 
             currentOrderRef = ref(db, `orders/${orderId}`);
-
-            // Listen for order updates
             orderListener = onValue(currentOrderRef, (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
                     updateBuyerUI(data.status);
-                    
-                    // Show chat when status is "taken" (accepted)
                     if (data.status === 'taken' || data.status === 'reached' || data.status === 'completed') {
                         document.getElementById('chat-section').classList.remove('hidden');
                         loadChatMessages(orderId);
@@ -589,27 +599,10 @@
             });
         }
 
-        // --- TOAST NOTIFICATION ---
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.className = `toast ${type}`;
-            toast.style.display = 'block';
-            setTimeout(() => {
-                toast.style.display = 'none';
-            }, 4000);
-        }
-
-        // --- FORM VALIDATION ---
+        // ===== VALIDATION =====
         function validatePhone(phone) {
-            if (!phone || phone.length !== 10 || !/^\d+$/.test(phone)) {
-                return false;
-            }
-            return true;
-        }
-
-        function validateMedicines(meds) {
-            return meds.trim().length > 0;
+            const regex = /^[6-9]\d{9}$/;
+            return regex.test(phone);
         }
 
         function showError(elementId, message) {
@@ -624,7 +617,7 @@
             }
         }
 
-        // --- FILE UPLOAD HANDLER ---
+        // ===== FILE UPLOAD HANDLER =====
         document.getElementById('drop-zone').addEventListener('click', () => {
             document.getElementById('file-input').click();
         });
@@ -632,25 +625,37 @@
         document.getElementById('file-input').addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
+                // Validate file type
+                const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                if (!validTypes.includes(file.type)) {
+                    showError('file-error', 'Only image files are allowed (JPEG, PNG, GIF, WebP)');
+                    return;
+                }
+
+                // Validate file size
                 if (file.size > 5 * 1024 * 1024) {
                     showError('file-error', 'File size must be less than 5MB');
                     return;
                 }
+
                 selectedFile = file;
-                document.getElementById('drop-zone').textContent = `✓ ${file.name}`;
+                document.getElementById('drop-zone').textContent = `✓ ${escapeHtml(file.name)}`;
                 document.getElementById('drop-zone').classList.add('has-file');
                 showError('file-error', '');
             }
         });
 
-        // --- FORM SUBMISSION ---
+        // ===== FORM SUBMISSION =====
         document.getElementById('submit-btn').addEventListener('click', async () => {
+            if (isSubmitting) return;
+
             const phone = document.getElementById('mobile').value.trim();
             const meds = document.getElementById('medicines').value.trim();
 
             let hasError = false;
+
             if (!validatePhone(phone)) {
-                showError('mobile-error', 'Enter valid 10-digit mobile number');
+                showError('mobile-error', 'Enter valid 10-digit mobile number (starts with 6-9)');
                 hasError = true;
             } else {
                 showError('mobile-error', '');
@@ -665,6 +670,7 @@
 
             if (hasError) return;
 
+            isSubmitting = true;
             const btn = document.getElementById('submit-btn');
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner"></span> Processing...';
@@ -675,11 +681,13 @@
                 if (selectedFile) {
                     const formData = new FormData();
                     formData.append("image", selectedFile);
+
                     try {
                         const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
                             method: "POST",
                             body: formData
                         });
+
                         const data = await res.json();
                         if (data.success) {
                             imageUrl = data.data.url;
@@ -688,30 +696,26 @@
                         }
                     } catch (e) {
                         showToast('❌ Image upload failed. Please try again.', 'error');
-                        btn.disabled = false;
-                        btn.innerHTML = '✓ Submit Order Instantly';
-                        return;
+                        throw e;
                     }
                 }
 
                 const payload = {
                     phone: phone,
-                    medicines: meds || "Prescription uploaded",
+                    medicines: escapeHtml(meds) || "Prescription uploaded",
                     photoUrl: imageUrl || null,
                     status: "pending",
                     timestamp: Date.now()
                 };
 
                 const ordersRef = ref(db, 'orders');
-                const newOrderRef = await push(ordersRef);
-                await set(newOrderRef, payload);
+                const newOrderRef = await push(ordersRef, payload);
 
                 showToast('✓ Order placed successfully!', 'success');
                 document.getElementById('order-panel').classList.add('hidden');
                 document.getElementById('tracking-panel').classList.remove('hidden');
                 document.getElementById('order-id').textContent = newOrderRef.key.substring(0, 8).toUpperCase();
 
-                // Save session
                 currentOrderId = newOrderRef.key;
                 saveSessionData(newOrderRef.key, phone);
 
@@ -720,7 +724,6 @@
                     const data = snapshot.val();
                     if (data) {
                         updateBuyerUI(data.status);
-
                         if (data.status === 'taken' || data.status === 'reached' || data.status === 'completed') {
                             document.getElementById('chat-section').classList.remove('hidden');
                             loadChatMessages(newOrderRef.key);
@@ -730,15 +733,17 @@
 
             } catch (error) {
                 showToast('❌ Error placing order: ' + error.message, 'error');
+            } finally {
+                isSubmitting = false;
                 btn.disabled = false;
                 btn.innerHTML = '✓ Submit Order Instantly';
             }
         });
 
-        // --- CHAT FUNCTIONALITY ---
+        // ===== CHAT FUNCTIONALITY =====
         function loadChatMessages(orderId) {
             const chatRef = ref(db, `chats/${orderId}`);
-            
+
             if (chatListener) {
                 off(chatListener);
             }
@@ -752,24 +757,22 @@
                     messages.push(childSnapshot.val());
                 });
 
-                // Sort by timestamp
                 messages.sort((a, b) => a.timestamp - b.timestamp);
 
                 messages.forEach(msg => {
                     const messageDiv = document.createElement('div');
                     messageDiv.className = `message ${msg.sender === 'buyer' ? 'buyer' : 'seller'}`;
-                    
+
                     const messageContent = document.createElement('div');
                     messageContent.className = 'message-content';
-                    messageContent.textContent = msg.text;
-
+                    messageContent.textContent = escapeHtml(msg.text);
                     messageDiv.appendChild(messageContent);
 
                     const timeDiv = document.createElement('div');
                     timeDiv.className = 'message-time';
-                    const time = new Date(msg.timestamp).toLocaleTimeString('en-IN', { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
+                    const time = new Date(msg.timestamp).toLocaleTimeString('en-IN', {
+                        hour: '2-digit',
+                        minute: '2-digit'
                     });
                     timeDiv.textContent = time;
                     messageDiv.appendChild(timeDiv);
@@ -777,7 +780,6 @@
                     messagesContainer.appendChild(messageDiv);
                 });
 
-                // Scroll to bottom
                 messagesContainer.scrollTop = messagesContainer.scrollHeight;
             });
         }
@@ -788,12 +790,17 @@
 
             if (!message || !currentOrderId) return;
 
+            // Prevent empty or very long messages
+            if (message.length > 1000) {
+                showToast('❌ Message is too long (max 1000 characters)', 'error');
+                return;
+            }
+
             try {
                 const chatRef = ref(db, `chats/${currentOrderId}`);
-                const newMessageRef = await push(chatRef);
-                await set(newMessageRef, {
+                await push(chatRef, {
                     sender: 'buyer',
-                    text: message,
+                    text: escapeHtml(message),
                     timestamp: Date.now()
                 });
 
@@ -803,14 +810,14 @@
             }
         });
 
-        // Send on Enter key
         document.getElementById('chat-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
                 document.getElementById('send-btn').click();
             }
         });
 
-        // --- UPDATE UI BASED ON STATUS ---
+        // ===== UPDATE UI BASED ON STATUS =====
         function updateBuyerUI(status) {
             const banner = document.getElementById('status-banner');
             const statusText = document.getElementById('status-text');
@@ -826,16 +833,56 @@
 
             const msg = messages[status] || messages.pending;
             if (status !== 'completed') {
-                banner.innerHTML = '<span class="spinner"></span><span>' + msg.text + '</span>';
+                banner.innerHTML = '<span class="spinner"></span><span>' + escapeHtml(msg.text) + '</span>';
             } else {
-                banner.innerHTML = msg.icon + ' ' + msg.text;
+                banner.innerHTML = escapeHtml(msg.icon) + ' ' + escapeHtml(msg.text);
                 document.getElementById('new-order-btn').classList.remove('hidden');
             }
 
             statusText.textContent = status.charAt(0).toUpperCase() + status.slice(1);
         }
 
-        // --- THEME TOGGLE ---
+        // ===== NEW ORDER BUTTON - MAIN FIX =====
+        document.getElementById('new-order-btn').addEventListener('click', () => {
+            // Clean up listeners
+            if (orderListener) {
+                off(orderListener);
+                orderListener = null;
+            }
+            if (chatListener) {
+                off(chatListener);
+                chatListener = null;
+            }
+
+            // Clear data
+            clearSessionData();
+            selectedFile = null;
+
+            // Reset form
+            document.getElementById('mobile').value = '';
+            document.getElementById('medicines').value = '';
+            document.getElementById('file-input').value = '';
+            document.getElementById('drop-zone').textContent = '📄 Click to upload or drag prescription image';
+            document.getElementById('drop-zone').classList.remove('has-file');
+
+            // Clear errors
+            showError('mobile-error', '');
+            showError('medicines-error', '');
+            showError('file-error', '');
+
+            // Reset UI
+            document.getElementById('tracking-panel').classList.add('hidden');
+            document.getElementById('order-panel').classList.remove('hidden');
+            document.getElementById('chat-section').classList.add('hidden');
+            document.getElementById('new-order-btn').classList.add('hidden');
+
+            // Focus on form
+            document.getElementById('mobile').focus();
+
+            showToast('✓ Ready for new order!', 'success');
+        });
+
+        // ===== THEME TOGGLE =====
         document.getElementById('theme-btn').addEventListener('click', () => {
             const isDark = document.body.dataset.theme === "dark";
             document.body.dataset.theme = isDark ? "" : "dark";
@@ -843,16 +890,26 @@
             localStorage.setItem('theme', isDark ? 'light' : 'dark');
         });
 
-        // Load saved theme
         const savedTheme = localStorage.getItem('theme');
         if (savedTheme === 'dark') {
             document.body.dataset.theme = "dark";
             document.getElementById('theme-btn').textContent = '☀️';
         }
 
-        // Load session on page init
+        // ===== PAGE LOAD =====
         window.addEventListener('load', () => {
             loadSessionData();
+            document.getElementById('mobile').focus();
+        });
+
+        // ===== CLEANUP ON PAGE UNLOAD =====
+        window.addEventListener('beforeunload', () => {
+            if (orderListener) {
+                off(orderListener);
+            }
+            if (chatListener) {
+                off(chatListener);
+            }
         });
     </script>
 </body>
